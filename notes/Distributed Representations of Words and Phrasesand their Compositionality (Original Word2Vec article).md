@@ -3,6 +3,7 @@ https://arxiv.org/pdf/1310.4546v1.pdf
 
 # Key points
 - Skip-gram model for learning words vector representation
+- ## Based on prediction instead of counting 
 - Remarkamble speedup achieved through hierarchical softmax/negative sampling
 - Model can organize concepts and learn implicitly the relationships between them (note exactly and with some limitations)
 

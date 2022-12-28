@@ -10,6 +10,7 @@ https://arxiv.org/pdf/1310.4546v1.pdf
 Article is delivering a new method for learning multi-dimensional word representations. An objective was to train vectors that can capture a large number of precise syntactic and semantic word relationships.
 
 # Solutions
+- model : $p = \frac{1}{T} \sum_{t=1}^T \sum_{−c≤j≤c,j\neq0} logp(w_{t+j}\mid w_t)$
 - Using skip gram model to train words embedding, but instead of use of classic softmax in the last layer, authors modified it and used techniue called hierarchical softmax. In softmax classifier, because of sum in denominator, the complexity is O(V), where V is corpus size- which can be millions in big models. Hierarchical model is O(K+1), where K is a constant associated with text corpus, but typically in [5, 20] range.
 - As an alternative Negative Sampling can be used - in this method we draw randomly K negative samples from noise distribtion, complexity is the same:  O(K+1), where K is a constant associated with text corpus, but typically in [5, 20] range.
 - Subsampling of Frequent Words - the propability of chosing a word during training is set to:
@@ -19,11 +20,10 @@ Article is delivering a new method for learning multi-dimensional word represent
 
 # Model
 Basic model used in tests
-	- model : $p = \frac{1}{T} \sum_{t=1}^T \sum_{−c≤j≤c,j\neq0} logp(w_{t+j}\mid w_t)$
-	- dimensions - 300
-	- window size - 5
-	- 692 000 tokens with count 5 or more
-	- 33 billions corpus size
+-  dimensions - 300
+- window size - 5
+- 692 000 tokens with count 5 or more
+- 33 billions corpus size
 
 
 # References

@@ -8,6 +8,7 @@ https://proceedings.neurips.cc/paper/2018/file/6a4d5952d4c018a1c1af9fa590a10dda-
 
 
 # Solutions
+
 ## Sparsegen Activation Framework
 - generic probability mapping function - $p(z) = sparsegen(z;g; \lambda) =\underset{p \in \Delta^{K-1}}{argmin}\mid \mid p-g(z) \mid \mid^2 - \lambda \mid \mid p \mid \mid^2$
 - $g: \mathbb{R}^k \rightarrow \mathbb{R}^k$ - component wise function applied to z
@@ -16,11 +17,14 @@ https://proceedings.neurips.cc/paper/2018/file/6a4d5952d4c018a1c1af9fa590a10dda-
 - examples: 
 	- for $g(z) = exp(z)$ and $\lambda = 1 - \sum_{j \in [K]} e^{z_j}$ function is softmax
 	- for $g(z) = z$ and $\lambda = 0$ function is sparsemax
+	
 ## Sparsegen-lin
 - $p(z) = sparsegen(z; \lambda) =\underset{p \in \Delta^{K-1}}{argmin}\mid \mid p-z \mid \mid^2 - \lambda \mid \mid p \mid \mid^2$
 - it applies L2 regulartisation to $p$ 
 - with $\lambda$ it controls width of sparse region
+
 ## Sparsecon
+
 Idea:
 - take vector $q = (-q,\dots, -q) \in \mathbb{R}^k$ for  $q>0$ and connect it with point $z$ - point were such a line intersects with hyperplane $1^Tz=1$ - edge of simplex
 - $g(z) = \alpha z + (1-\alpha)q$ where $\alpha = \frac{1+Kq}{\sum_i z_i + Kq}$ 
@@ -32,7 +36,9 @@ Idea:
 - cons:
 	- for $\sum_i z_i < -Kq$ it is undefined
 	- not Lipschitz continuous
+	
 ## Sparsehourglass
+
 - $p(z) = \underset{p \in \Delta^{K-1}}{argmin}\mid \mid p - \frac{1+Kq}{\mid\sum_i z_i\mid + Kq} z \mid \mid^2$
 - for points satisfying $\sum_i z_i > 0$ - sparsecon
 - other points are mapped to **mirror points** satisfying $\sum_i z_i > 0$

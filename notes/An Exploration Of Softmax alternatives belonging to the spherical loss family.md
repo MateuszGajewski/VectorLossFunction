@@ -35,4 +35,3 @@ $SSsm(z)_i = \frac{z_i^2 + \epsilon}{\sum_{i}z_j^2 + \epsilon}$, where $\epsilon
 - On MNIST and CIFAR10, the spherical losses work surprisingly well and, for the fixed architectures and they even outperform the log-softmax. 
 - This suggests that the log-softmax is not necessarily the best loss function for classification and that alternatives such as categorical log-losses from the spherical family might be preferred in a broad range of applications.
 - On the other hand, in our experiments with higher output dimensions, i.e. on CIFAR100, the Penntree bank and the one Billion Word dataset, we found that the log softmax yields better results than the log-spherical softmax and the log-Taylor softmax.
-- 

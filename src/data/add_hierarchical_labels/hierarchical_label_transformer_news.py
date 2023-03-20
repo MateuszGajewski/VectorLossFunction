@@ -38,8 +38,3 @@ class HierarchicalLabelTransformerNews(HierarchicalLabelTransformer):
         test_df.to_csv(dst_test)
         with open(str(dst.parent.resolve()) + '/hierarchical_labels.json', 'w') as fp:
             json.dump(self.new_categories_dict, fp)
-
-h = HierarchicalLabelTransformerNews()
-h.add_label(Path('../../../data/raw/news_category/News_Category_Dataset_v3.json'),
-            Path('../../../data/processed/hierarchical_labels/news_category/News_Category_Dataset_v3_train.csv'),
-            Path('../../../data/processed/hierarchical_labels/news_category/News_Category_Dataset_v3_test.csv'))

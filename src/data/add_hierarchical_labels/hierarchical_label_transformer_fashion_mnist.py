@@ -30,8 +30,6 @@ class HierarchicalLabelTransformerFashionMnist(HierarchicalLabelTransformer):
             json.dump(labels, fp)
 
 
-h = HierarchicalLabelTransformerFashionMnist()
-h.add_label(Path('../../../data/raw/fashion_mnist/fashion-mnist_test.csv'),
-            Path('../../../data/processed/hierarchical_labels/fashion_mnist/fashion-mnist_test.csv'))
+
 
 

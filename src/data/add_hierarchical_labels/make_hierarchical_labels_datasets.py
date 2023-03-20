@@ -1,6 +1,7 @@
 from src.data.add_hierarchical_labels.hierarchical_label_transformer_news import HierarchicalLabelTransformerNews
 from src.data.add_hierarchical_labels.hierarchical_label_transformer_fashion_mnist import HierarchicalLabelTransformerFashionMnist
 from src.data.add_hierarchical_labels.hierarchical_label_transformer_amazon_rewievs import HierarchicalLabelTransformerAmazonReviews
+from src.data.add_hierarchical_labels.hierarchical_label_transformer_wine_quality import HierarchicalLabelTransformerWineQuality
 
 from pathlib import Path
 
@@ -21,3 +22,8 @@ if __name__ == "__main__":
     h = HierarchicalLabelTransformerAmazonReviews()
     h.add_label(Path('../../../data/raw/amazon_reviews/val_10k.csv'),
                      Path('../../../data/processed/hierarchical_labels/amazon_rewievs/val_10k.csv'))
+
+    h = HierarchicalLabelTransformerWineQuality()
+    h.add_label(Path('../../../data/raw/wine_quality/winequalityN.csv'),
+                Path('../../../data/processed/hierarchical_labels/wine_quality/winequalityN_train.csv'),
+                Path('../../../data/processed/hierarchical_labels/wine_quality/winequalityN_test.csv'))

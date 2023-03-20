@@ -1,0 +1,4 @@
+outs:
+- md5: e7c3b60bf129019d18bebdce036a2d16
+  size: 369538
+  path: winequalityN_train.csv

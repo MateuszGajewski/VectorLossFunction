@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     h = HierarchicalLabelTransformerAmazonReviews()
     h.add_label(Path('../../../data/raw/amazon_reviews/val_10k.csv'),
-                     Path('../../../data/processed/hierarchical_labels/amazon_rewievs/val_10k.csv'))
+                Path('../../../data/processed/hierarchical_labels/amazon_rewievs/val_10k.csv'))
 
     h = HierarchicalLabelTransformerWineQuality()
     h.add_label(Path('../../../data/raw/wine_quality/winequalityN.csv'),

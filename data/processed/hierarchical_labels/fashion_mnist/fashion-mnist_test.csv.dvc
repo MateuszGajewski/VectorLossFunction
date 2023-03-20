@@ -1,0 +1,4 @@
+outs:
+- md5: 5ef10645c46cd5dd4acb45ae8b648425
+  size: 22245601
+  path: fashion-mnist_test.csv

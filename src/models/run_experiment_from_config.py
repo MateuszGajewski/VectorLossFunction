@@ -26,11 +26,11 @@ class Experiment:
         self.config = configparser.ConfigParser()
         self.config.read('./configs/config.ini')
         mlflow.set_tracking_uri('../../mlruns')
-        mlflow.set_experiment('Test')
+        mlflow.set_experiment(self.config['training']['experiment'])
 
     def save_model(self, model_ft):
         mlflow.pytorch.log_model(model_ft, "models")
-        mlflow.pytorch.save_model(model_ft, '../../' + str(date.today()) + '/')
+        #mlflow.pytorch.save_model(model_ft, '../../' + str(date.today()) + '/')
         #   mlflow.log_metric('history',hist)
         #torch.save(model_ft.state_dict(),
         #           './' + str(date.today()) + '.pth')

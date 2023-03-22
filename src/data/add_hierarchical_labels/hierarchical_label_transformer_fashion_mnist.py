@@ -28,8 +28,9 @@ class HierarchicalLabelTransformerFashionMnist(HierarchicalLabelTransformer):
 
     def add_label(self, src: Path, dst: Path) -> None:
         df = pd.read_csv(src)
+        df.insert(0, 'hierarchical_label', '')
         df["hierarchical_label"] = df.apply(lambda row: self.new_label(row), axis=1)
-        df.to_csv(dst)
+        df.to_csv(dst, index=False)
         with open(str(dst.parent.resolve()) + "/hierarchical_labels.json", "w") as fp:
             json.dump(self.new_categories_dict, fp)
 

@@ -28,6 +28,13 @@ if __name__ == "__main__":
             "../../../data/processed/hierarchical_labels/fashion_mnist/fashion-mnist_test.csv"
         ),
     )
+    h = HierarchicalLabelTransformerFashionMnist()
+    h.add_label(
+        Path("../../../data/raw/fashion_mnist/fashion-mnist_train.csv"),
+        Path(
+            "../../../data/processed/hierarchical_labels/fashion_mnist/fashion-mnist_train.csv"
+        ),
+    )
 
     h = HierarchicalLabelTransformerAmazonReviews()
     h.add_label(

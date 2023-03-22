@@ -1,0 +1,1 @@
+from .simple_visual_classifier import SimpleVisualClassifier

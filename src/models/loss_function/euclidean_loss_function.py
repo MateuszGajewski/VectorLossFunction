@@ -8,5 +8,5 @@ class EuclideanLossFunction(nn.Module):
     #    super(EuclideanLoss, self).__init__()
 
     def forward(self, predicted, target):
-        loss = torch.sqrt((predicted - target) ** 2).sum()
+        loss = torch.norm(predicted-target)
         return loss

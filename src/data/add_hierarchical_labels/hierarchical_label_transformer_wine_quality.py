@@ -27,7 +27,7 @@ class HierarchicalLabelTransformerWineQuality(HierarchicalLabelTransformer):
         msk = np.random.rand(len(df)) < 0.8
         train_df = df[msk]
         test_df = df[~msk]
-        train_df.to_csv(dst)
-        test_df.to_csv(dst_test)
+        train_df.to_csv(dst, index=False)
+        test_df.to_csv(dst_test, index=False)
         with open(str(dst.parent.resolve()) + "/hierarchical_labels.json", "w") as fp:
             json.dump(self.new_categories_dict, fp)

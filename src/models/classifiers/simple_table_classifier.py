@@ -6,6 +6,9 @@ import mlflow
 
 class SimpleTableClassifier(nn.Module):
 
+    def __str__(self):
+        return "Simple_Table_Cassifier"
+
     def __init__(self, features_size, out_dim):
         super(SimpleTableClassifier, self).__init__()
         # Setting a standard number of hidden units for each layer

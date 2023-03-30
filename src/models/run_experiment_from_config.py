@@ -14,7 +14,7 @@ from datetime import date
 
 
 class Experiment:
-    def __init__(self, config_file_pat: Path):
+    def __init__(self, config_file_path: Path):
         self.criterion = None
         self.train_loader = None
         self.test_loader = None
@@ -22,12 +22,12 @@ class Experiment:
         self.optimizer = None
         self.device = None
         self.config = configparser.ConfigParser()
-        self.config.read('./configs/simple_table_config.ini')
+        self.config.read(config_file_path)
         mlflow.set_tracking_uri('../../mlruns')
         mlflow.set_experiment(self.config['training']['experiment'])
 
     def save_model(self, model_ft):
-        mlflow.pytorch.log_model(model_ft, "models")
+        mlflow.pytorch.log_model(model_ft, str(model_ft))
         # mlflow.pytorch.save_model(model_ft, '../../' + str(date.today()) + '/')
         #   mlflow.log_metric('history',hist)
         # torch.save(model_ft.state_dict(),
@@ -68,6 +68,6 @@ class Experiment:
 
 
 if __name__ == "__main__":
-    experiment = Experiment(Path("configs/simple_visual_config.ini"))
+    experiment = Experiment(Path('./configs/simple_table_config.ini'))
     experiment.build_objects()
     experiment.train_and_log_model()

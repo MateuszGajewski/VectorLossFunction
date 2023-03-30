@@ -6,6 +6,10 @@ import mlflow
 
 
 class SimpleVisualClassifier(nn.Module):
+
+    def __str__(self):
+        return "Simple_Visual_Cassifier"
+
     def __init__(self, out_dim=3):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 6, 5)

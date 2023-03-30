@@ -6,6 +6,9 @@ import mlflow
 
 class SimpleTextClassifier(nn.Module):
 
+    def __str__(self):
+        return "Simple_Text_Cassifier"
+
     def __init__(self, vocab_size, embed_dim, num_class):
         super(SimpleTextClassifier, self).__init__()
         self.embedding = nn.EmbeddingBag(vocab_size, embed_dim, sparse=False)

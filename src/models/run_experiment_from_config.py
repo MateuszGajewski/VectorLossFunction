@@ -28,11 +28,6 @@ class Experiment:
 
     def save_model(self, model_ft):
         mlflow.pytorch.log_model(model_ft, str(model_ft))
-        # mlflow.pytorch.save_model(model_ft, '../../' + str(date.today()) + '/')
-        #   mlflow.log_metric('history',hist)
-        # torch.save(model_ft.state_dict(),
-        #           './' + str(date.today()) + '.pth')
-
 
     def build_objects(self):
         self.device = self.config['training']['device']

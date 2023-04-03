@@ -5,7 +5,6 @@ from torch.utils.data import DataLoader
 import src.data.datasets as dataset
 import src.models.classifiers as classifiers
 
-
 class WineQualityDataLoader:
 
     @staticmethod

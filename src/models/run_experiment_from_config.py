@@ -12,7 +12,6 @@ import torch.optim as optim
 import torchmetrics
 from datetime import date
 
-
 class Experiment:
     def __init__(self, config_file_path: Path):
         self.criterion = None

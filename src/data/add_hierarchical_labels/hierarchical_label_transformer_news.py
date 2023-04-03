@@ -52,9 +52,9 @@ class HierarchicalLabelTransformerNews(HierarchicalLabelTransformer):
     def add_label(self, src: Path, dst: Path, dst_test: Path = None) -> None:
         df = pd.read_json(src, lines=True)
         df = self.drop_rows_not_in_dict(df)
-        df = df.fillna('')
+        df = df.fillna("")
         df["hierarchical_label"] = df.apply(lambda row: self.new_label(row), axis=1)
-        df['label'] = pd.Categorical(df['category']).codes
+        df["label"] = pd.Categorical(df["category"]).codes
         msk = np.random.rand(len(df)) < 0.8
         train_df = df[msk]
         test_df = df[~msk]

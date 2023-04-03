@@ -1,6 +1,6 @@
-import numpy as np
 import pandas as pd
-from torch.utils.data import Dataset
+import numpy as np
+from torch.utils.data import Dataset, DataLoader, random_split
 
 
 class FashionMNISTDataset(Dataset):
@@ -18,9 +18,7 @@ class FashionMNISTDataset(Dataset):
         label = self.data.iloc[index, 0]
 
         if self.label_to_vec_function:
-            label = self.label_to_vec_function(
-                self.data.iloc[index, 0], self.data.iloc[index, 1]
-            )
+            label = self.label_to_vec_function(self.data.iloc[index, 0], self.data.iloc[index, 1])
 
         # Apply the transformation (if any) to the image
         if self.transform:

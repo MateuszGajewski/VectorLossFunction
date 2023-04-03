@@ -1,3 +1,0 @@
-from .simple_visual_classifier import SimpleVisualClassifier
-from .simple_text_classifier import SimpleTextClassifier
-from .simple_table_classifier import SimpleTableClassifier

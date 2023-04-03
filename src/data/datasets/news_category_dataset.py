@@ -1,6 +1,5 @@
 import pandas as pd
-import numpy as np
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset
 
 
 class NewsCategoryDataset(Dataset):
@@ -18,6 +17,8 @@ class NewsCategoryDataset(Dataset):
         label = self.data.iloc[index, 7]
 
         if self.label_to_vec_function:
-            label = self.label_to_vec_function(self.data.iloc[index, 7], self.data.iloc[index, 6])
+            label = self.label_to_vec_function(
+                self.data.iloc[index, 7], self.data.iloc[index, 6]
+            )
 
         return text, label

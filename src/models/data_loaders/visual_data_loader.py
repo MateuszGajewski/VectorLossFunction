@@ -5,7 +5,6 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
 
-
 class VisualDataLoader:
     @staticmethod
     def simple_f(l, lh):

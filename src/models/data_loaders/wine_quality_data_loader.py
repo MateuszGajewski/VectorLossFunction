@@ -4,7 +4,6 @@ import torch
 from torch.utils.data import DataLoader
 
 
-
 class WineQualityDataLoader:
     @staticmethod
     def simple_f(l, lh):

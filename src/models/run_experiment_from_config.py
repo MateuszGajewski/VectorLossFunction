@@ -4,7 +4,6 @@ from pathlib import Path
 import mlflow
 
 
-
 class Experiment:
     def __init__(self, config_file_path: Path):
         self.criterion = None

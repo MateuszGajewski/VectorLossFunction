@@ -6,7 +6,6 @@ from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
 
 
-
 class TextDataLoader:
     def __init__(self):
         self.vocab = None

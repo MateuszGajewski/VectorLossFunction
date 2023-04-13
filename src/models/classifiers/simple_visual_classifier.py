@@ -41,12 +41,12 @@ class SimpleVisualClassifier(nn.Module):
                 optimizer.zero_grad()
                 # forward + backward + optimize
                 outputs = self.forward(inputs)
-                loss = criterion(outputs, labels)
+                loss = criterion(outputs, labels, epoch)
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
                 if i % 10 == 1:
-                    print(f"[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}")
+                    print(f"[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.5f}")
                     running_loss = 0.0
 
         print("Finished Training")
@@ -65,7 +65,7 @@ class SimpleVisualClassifier(nn.Module):
                 # forward + backward + optimize
                 outputs = self.forward(inputs)
                 outputs = outputs.to(config["training"]["device"])
-                loss = criterion(outputs, labels)
+                loss = criterion(outputs, labels, 0)
                 total_loss += loss.item()
                 print(loss, outputs, labels)
                 total_number += labels.size(0)

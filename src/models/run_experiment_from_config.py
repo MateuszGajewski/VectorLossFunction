@@ -4,6 +4,7 @@ from datetime import date
 from pathlib import Path
 
 import mlflow
+import json
 import torch
 import torch.optim as optim
 import torchmetrics
@@ -23,6 +24,7 @@ class Experiment:
         self.device = None
         self.config = configparser.ConfigParser()
         self.config.read(config_file_path)
+        self.label_hierarchy = None
         mlflow.set_tracking_uri("../../mlruns")
         mlflow.set_experiment(self.config["training"]["experiment"])
 
@@ -30,8 +32,12 @@ class Experiment:
         mlflow.pytorch.log_model(model_ft, str(model_ft))
 
     def build_objects(self):
+
+        if self.config.has_option('data', 'labels_hierarchy'):
+            self.label_hierarchy = json.load(open(self.config['data']['labels_hierarchy']))
+
         self.device = self.config["training"]["device"]
-        self.criterion = eval(self.config["training"]["loss_function"])()
+        self.criterion = eval(self.config["training"]["loss_function"])(self.label_hierarchy)
 
         data_loader = eval(self.config["data"]["data_loader"])
 
@@ -67,6 +73,6 @@ class Experiment:
 
 
 if __name__ == "__main__":
-    experiment = Experiment(Path("./configs/simple_table_config.ini"))
+    experiment = Experiment(Path("./configs/visual_config_davies_bouldin.ini"))
     experiment.build_objects()
     experiment.train_and_log_model()

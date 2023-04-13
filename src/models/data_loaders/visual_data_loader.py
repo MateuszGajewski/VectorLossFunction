@@ -24,12 +24,12 @@ class VisualDataLoader:
         dataset_train = dataset_class(
             Path(config["data"]["train_data"]),
             transform=transform,
-            label_to_vec_function=self.simple_f,
+            #label_to_vec_function=self.simple_f,
         )
         dataset_test = dataset_class(
             Path(config["data"]["test_data"]),
             transform=transform,
-            label_to_vec_function=self.simple_f,
+            #label_to_vec_function=self.simple_f,
         )
 
         train_loader = DataLoader(

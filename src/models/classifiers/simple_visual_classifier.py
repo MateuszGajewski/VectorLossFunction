@@ -18,6 +18,10 @@ class SimpleVisualClassifier(nn.Module):
         self.fc1 = nn.Linear(16 * 4 * 4, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, out_dim)
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                #m.bias.data.fill_(0.01)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))

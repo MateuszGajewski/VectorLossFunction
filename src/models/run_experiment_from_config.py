@@ -61,6 +61,7 @@ class Experiment:
             mlflow.log_param("epochs", self.config["training"]["epochs"])
             mlflow.log_param("learning_rate", self.config["training"]["lr"])
             mlflow.log_param("momentum", self.config["training"]["momentum"])
+            mlflow.log_param("loss_functon", self.config['training']['loss_function'])
             self.train()
             self.validate()
             self.save_model(self.cls)

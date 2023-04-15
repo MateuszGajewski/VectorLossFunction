@@ -4,7 +4,7 @@ import mlflow
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from torchmetrics.classification import MulticlassAccuracy
 
 class SimpleVisualClassifier(nn.Module):
     def __str__(self):
@@ -32,7 +32,7 @@ class SimpleVisualClassifier(nn.Module):
         x = self.fc3(x)
         return x
 
-    def fit(self, config, optimizer, criterion, train_loader):
+    def fit(self, config, optimizer, criterion, train_loader, vector_to_label_transformer = None):
         since = time.time()
         for epoch in range(
             int(config["training"]["epochs"])
@@ -52,14 +52,17 @@ class SimpleVisualClassifier(nn.Module):
                 if i % 10 == 1:
                     print(f"[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.5f}")
                     running_loss = 0.0
-
+        if vector_to_label_transformer:
+            vector_to_label_transformer.fit(criterion)
         print("Finished Training")
         time_elapsed = time.time() - since
         mlflow.log_metric("Training time", time_elapsed)
 
-    def validate(self, config, optimizer, criterion, test_loader):
+    def validate(self, config, optimizer, criterion, test_loader, vector_to_label_transformer = None):
         total_loss = 0.0
         total_number = 0
+        print(criterion.centroids)
+        metric = MulticlassAccuracy(num_classes=10)
         with torch.no_grad():
             for i, data in enumerate(test_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
@@ -69,10 +72,13 @@ class SimpleVisualClassifier(nn.Module):
                 # forward + backward + optimize
                 outputs = self.forward(inputs)
                 outputs = outputs.to(config["training"]["device"])
-                loss = criterion(outputs, labels, 0)
+                if vector_to_label_transformer:
+                    outputs = vector_to_label_transformer.predict(outputs)
+                loss = metric(outputs, labels)
                 total_loss += loss.item()
-                print(loss, outputs, labels)
-                total_number += labels.size(0)
+                print(loss)
+                #print(outputs, labels)
+                total_number += 1
 
         print(f"Finished validaion, avg loss: {total_loss / total_number}")
         mlflow.log_metric("Avg test loss", total_loss / total_number)

@@ -13,6 +13,9 @@ class DaviesBouldinLossFunction(nn.Module):
         self.class_weights_matrix = self.build_class_weight_matrix(json)
         self.epoch = 0
 
+    def get_centroids(self):
+        return self.centroids
+
     def init_tensors(self, predicted, target):
         out_dimension = predicted.shape[1]
         self.sum = torch.zeros(self.class_number, out_dimension)
@@ -67,7 +70,8 @@ class DaviesBouldinLossFunction(nn.Module):
             for j in range(0, self.class_number):
                 if i != j:
                     sum_ += self.class_weights_matrix[i][j] * (s[i] + s[j]) / m[i][j]
-        return sum_ / self.class_number * (self.class_number - 1)
+        loss = sum_ / self.class_number * (self.class_number - 1)
+        return loss + torch.sum(torch.abs(centroids))/1000000
 
     def forward(self, predicted, target, epoch):
         if self.sum is None:

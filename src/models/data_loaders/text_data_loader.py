@@ -41,10 +41,10 @@ class TextDataLoader:
         self.device = config["training"]["device"]
         dataset_class = eval(config["data"]["dataset"])
         dataset_train = dataset_class(
-            Path(config["data"]["train_data"]), label_to_vec_function=self.simple_f
+            Path(config["data"]["train_data"])
         )
         dataset_test = dataset_class(
-            Path(config["data"]["test_data"]), label_to_vec_function=self.simple_f
+            Path(config["data"]["test_data"])
         )
         self.tokenizer = get_tokenizer("basic_english")
 

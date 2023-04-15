@@ -34,6 +34,8 @@ class SimpleVisualClassifier(nn.Module):
 
     def fit(self, config, optimizer, criterion, train_loader, vector_to_label_transformer = None):
         since = time.time()
+        criterion.assign_data_loader(train_loader)
+        criterion.assign_model(self)
         for epoch in range(
             int(config["training"]["epochs"])
         ):  # loop over the dataset multiple times
@@ -41,10 +43,13 @@ class SimpleVisualClassifier(nn.Module):
             for i, data in enumerate(train_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
+                inputs = inputs.to(config["training"]["device"])
+                labels = labels.to(config["training"]["device"])
                 # zero the parameter gradients
                 optimizer.zero_grad()
                 # forward + backward + optimize
                 outputs = self.forward(inputs)
+                outputs = outputs.to(config["training"]["device"])
                 loss = criterion(outputs, labels, epoch)
                 loss.backward()
                 optimizer.step()
@@ -54,6 +59,7 @@ class SimpleVisualClassifier(nn.Module):
                     running_loss = 0.0
         if vector_to_label_transformer:
             vector_to_label_transformer.fit(criterion)
+            print(criterion.get_centroids())
         print("Finished Training")
         time_elapsed = time.time() - since
         mlflow.log_metric("Training time", time_elapsed)
@@ -61,8 +67,8 @@ class SimpleVisualClassifier(nn.Module):
     def validate(self, config, optimizer, criterion, test_loader, vector_to_label_transformer = None):
         total_loss = 0.0
         total_number = 0
-        print(criterion.centroids)
         metric = MulticlassAccuracy(num_classes=10)
+
         with torch.no_grad():
             for i, data in enumerate(test_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]

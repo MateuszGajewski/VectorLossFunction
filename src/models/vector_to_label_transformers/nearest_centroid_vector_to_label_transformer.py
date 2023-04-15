@@ -10,7 +10,8 @@ class NearestCentroidVectorToLabelTransformer:
         self.centroids = criterion.get_centroids()
 
     def predict(self, input_batch):
-        #print(self.centroids)
+        print(input_batch)
         dist = torch.cdist(self.centroids, input_batch)
         labels = torch.argmin(dist.t(), dim=1)
+        print(labels)
         return labels

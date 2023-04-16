@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchmetrics.classification import MulticlassAccuracy
 
+
 class SimpleVisualClassifier(nn.Module):
     def __str__(self):
         return "Simple_Visual_Cassifier"
@@ -67,7 +68,7 @@ class SimpleVisualClassifier(nn.Module):
     def validate(self, config, optimizer, criterion, test_loader, vector_to_label_transformer = None):
         total_loss = 0.0
         total_number = 0
-        metric = MulticlassAccuracy(num_classes=10)
+        metric = MulticlassAccuracy(num_classes=10).to(config["training"]["device"])
 
         with torch.no_grad():
             for i, data in enumerate(test_loader, 0):

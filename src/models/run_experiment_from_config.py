@@ -40,6 +40,9 @@ class Experiment:
         else:
             self.criterion = eval(self.config["training"]["loss_function"])()
 
+        if self.config.has_option('training', 'recalculate_period'):
+            self.criterion.set_recalculate_period(self.config['training']['recalculate_period'])
+
         self.device = self.config["training"]["device"]
 
         self.vector_to_label_transformer = eval(self.config

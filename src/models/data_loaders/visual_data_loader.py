@@ -46,4 +46,5 @@ class VisualDataLoader:
             int(config["training"]["out_dim"])
         ).to(config["training"]["device"])
 
+
         return train_loader, test_loader, cls

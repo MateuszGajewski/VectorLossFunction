@@ -5,6 +5,7 @@ import torch.nn as nn
 class DaviesBouldinLossFunction(nn.Module):
     def __init__(self, json=None):
         super(DaviesBouldinLossFunction, self).__init__()
+        self.device = 'cuda'
         self.data_loader = None
         self.model = None
         self.distances = None
@@ -13,9 +14,12 @@ class DaviesBouldinLossFunction(nn.Module):
         self.centroids = None
         self.class_number = self.get_class_number(json)
         self.class_weights_matrix = self.build_class_weight_matrix(json)
-        self.epoch = 0
-        self.device = 'cpu'
-    
+        self.epoch_count = 0
+        self.recalculate_period = 0
+
+    def set_recalculate_period(self, recalculate_period):
+        self.recalculate_period = int(recalculate_period)
+
     def assign_model(self, model):
         self.model = model
         
@@ -51,10 +55,10 @@ class DaviesBouldinLossFunction(nn.Module):
 
     def init_tensors(self, predicted, target):
         out_dimension = predicted.shape[1]
-        self.sum = torch.zeros(self.class_number, out_dimension)
-        self.count = torch.zeros(self.class_number, 1)
-        self.centroids = torch.zeros(self.class_number, 1)
-        self.distances = torch.zeros(self.class_number, 1)
+        self.sum = torch.zeros(self.class_number, out_dimension).to(self.device)
+        self.count = torch.zeros(self.class_number, 1).to(self.device)
+        self.centroids = torch.zeros(self.class_number, 1).to(self.device)
+        self.distances = torch.zeros(self.class_number, 1).to(self.device)
 
     def build_class_weight_matrix(self, json):
         matrix = torch.ones((self.class_number, self.class_number))
@@ -63,17 +67,18 @@ class DaviesBouldinLossFunction(nn.Module):
                 for key in json.keys():
                     if str(i) in json[key] and str(j) in json[key]:
                         matrix[i][j] = 1.5
-        return matrix
+        return matrix.to(self.device)
 
     def update_centroids(self, predicted, target):
         self.sum.index_add_(0, target, predicted.float())
-        count = torch.bincount(target)
+        count = torch.bincount(target).to(self.device)
         count = torch.nn.functional.pad(count, pad=(0, self.class_number - count.shape[0]))
         self.count[:, 0] += count
 
     def update_distances(self, predicted, target):
         t = torch.index_select(self.centroids, 0, target)
         t = torch.norm(t - predicted, dim=1)
+        t = t.reshape(target.shape[0], 1)
         self.distances.index_add_(0, target, t)
 
     def calculate_centroids(self):
@@ -87,8 +92,8 @@ class DaviesBouldinLossFunction(nn.Module):
         return class_number
 
     def calculate_loss(self, predicted, target):
-        centroids = self.centroids.detach().clone()
-        s = self.distances.detach().clone()  # coherence in class
+        centroids = self.centroids.detach().clone().to(self.device)
+        s = self.distances.detach().clone().to(self.device)  # coherence in class
         selected_counts = torch.index_select(self.count, 0, target)
         selected_centroids = torch.index_select(centroids, 0, target)
         centroids.index_add_(0, target, (predicted -selected_centroids)/ selected_counts)
@@ -97,8 +102,8 @@ class DaviesBouldinLossFunction(nn.Module):
         s.index_add_(0, target, vec.reshape(target.shape[0], 1))
         s = torch.sqrt(s)
         s = s / self.count
-        m = torch.cdist(centroids, centroids, p=2)  # class centrioids separation
-        sum_ = torch.zeros(1)
+        m = torch.cdist(centroids, centroids, p=2).to(self.device)  # class centrioids separation
+        sum_ = torch.zeros(1).to(self.device)
         for i in range(0, self.class_number):
             for j in range(0, self.class_number):
                 if i != j:
@@ -107,9 +112,12 @@ class DaviesBouldinLossFunction(nn.Module):
         return loss #+ torch.sum(torch.abs(centroids))/100
 
     def forward(self, predicted, target, epoch):
-        self.init_tensors(predicted, target)
-        self.recalculate_centroids()
-        self.recalculate_distances()
-        self.calculate_centroids()
+        self.epoch_count+=1
+        if self.epoch_count > self.recalculate_period or self.sum is None:
+            self.init_tensors(predicted, target)
+            self.recalculate_centroids()
+            self.recalculate_distances()
+            self.calculate_centroids()
+            self.epoch_count = 0
         loss = self.calculate_loss(predicted, target)
         return loss

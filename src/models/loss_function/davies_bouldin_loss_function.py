@@ -5,7 +5,7 @@ import torch.nn as nn
 class DaviesBouldinLossFunction(nn.Module):
     def __init__(self, json=None):
         super(DaviesBouldinLossFunction, self).__init__()
-        self.device = 'cuda'
+        self.device = 'cpu'
         self.data_loader = None
         self.model = None
         self.distances = None
@@ -39,6 +39,7 @@ class DaviesBouldinLossFunction(nn.Module):
                 outputs = self.model.forward(inputs)
                 outputs.to(self.device)
                 self.update_centroids(outputs, labels)
+        self.calculate_centroids()
 
     def recalculate_distances(self):
         with torch.no_grad():
@@ -117,7 +118,6 @@ class DaviesBouldinLossFunction(nn.Module):
             self.init_tensors(predicted, target)
             self.recalculate_centroids()
             self.recalculate_distances()
-            self.calculate_centroids()
             self.epoch_count = 0
         loss = self.calculate_loss(predicted, target)
         return loss

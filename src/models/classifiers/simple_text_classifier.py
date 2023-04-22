@@ -25,15 +25,18 @@ class SimpleTextClassifier(nn.Module):
         embedded = self.embedding(text, offsets)
         return self.fc(embedded)
 
-    def fit(self, config, optimizer, criterion, train_loader):
+    def fit(self, config, optimizer, criterion, train_loader, vector_to_label_transformer = None):
         since = time.time()
         self.train()
         for epoch in range(int(config["training"]["epochs"])):
             running_loss = 0.0
             for i, (label, text, offsets) in enumerate(train_loader):
                 optimizer.zero_grad()
-                predicted_label = self.forward(text, offsets)
-                loss = criterion(predicted_label, label)
+                text = text.to(config["training"]["device"])
+                label = label.to(config["training"]["device"])
+                outputs = self.forward(text, offsets)
+                outputs = outputs.to(config["training"]["device"])
+                loss = criterion(outputs, label)
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(self.parameters(), 0.1)
                 optimizer.step()
@@ -46,7 +49,7 @@ class SimpleTextClassifier(nn.Module):
             time_elapsed = time.time() - since
             mlflow.log_metric("Training time", time_elapsed)
 
-    def validate(self, config, optimizer, criterion, test_loader):
+    def validate(self, config, optimizer, criterion, test_loader, vector_to_label_transformer = None):
         total_loss = 0.0
         total_number = 0
         with torch.no_grad():
@@ -57,6 +60,8 @@ class SimpleTextClassifier(nn.Module):
                 # forward + backward + optimize
                 outputs = self.forward(text, offsets)
                 outputs = outputs.to(config["training"]["device"])
+                if vector_to_label_transformer:
+                    outputs = vector_to_label_transformer.predict(outputs)
                 loss = criterion(outputs, labels)
                 total_loss += loss.item()
                 total_number += labels.size(0)

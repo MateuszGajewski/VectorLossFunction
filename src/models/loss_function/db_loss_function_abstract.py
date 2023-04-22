@@ -1,11 +1,13 @@
 import torch
-import torch.nn as nn
+from .abstract_loss_function import AbstractLossFunction
+from abc import abstractmethod
 
 
-class DaviesBouldinLossFunction(nn.Module):
-    def __init__(self, json=None):
-        super(DaviesBouldinLossFunction, self).__init__()
-        self.device = 'cpu'
+class DBLossFunctionAbstract(AbstractLossFunction):
+
+    def __init__(self, device='cpu', json=None):
+        super(DBLossFunctionAbstract, self).__init__()
+        self.device = device
         self.data_loader = None
         self.model = None
         self.distances = None
@@ -29,30 +31,6 @@ class DaviesBouldinLossFunction(nn.Module):
     def get_centroids(self):
         self.calculate_centroids()
         return self.centroids
-
-    def recalculate_centroids(self):
-        with torch.no_grad():
-            for i, data in enumerate(self.data_loader, 0):
-                inputs, labels = data
-                inputs = inputs.to(self.device)
-                labels = labels.to(self.device)
-                outputs = self.model.forward(inputs)
-                outputs.to(self.device)
-                self.update_centroids(outputs, labels)
-        self.calculate_centroids()
-
-    def recalculate_distances(self):
-        with torch.no_grad():
-            for i, data in enumerate(self.data_loader, 0):
-                inputs, labels = data
-                inputs = inputs.to(self.device)
-                labels = labels.to(self.device)
-                outputs = self.model.forward(inputs)
-                outputs.to(self.device)
-                self.update_distances(outputs, labels)
-
-
-
 
     def init_tensors(self, predicted, target):
         out_dimension = predicted.shape[1]
@@ -97,7 +75,7 @@ class DaviesBouldinLossFunction(nn.Module):
         s = self.distances.detach().clone().to(self.device)  # coherence in class
         selected_counts = torch.index_select(self.count, 0, target)
         selected_centroids = torch.index_select(centroids, 0, target)
-        centroids.index_add_(0, target, (predicted -selected_centroids)/ selected_counts)
+        centroids.index_add_(0, target, (predicted - selected_centroids) / selected_counts)
         pr = predicted / selected_counts
         vec = torch.linalg.vector_norm(selected_centroids - pr, dim=1)
         s.index_add_(0, target, vec.reshape(target.shape[0], 1))
@@ -110,10 +88,10 @@ class DaviesBouldinLossFunction(nn.Module):
                 if i != j:
                     sum_ += self.class_weights_matrix[i][j] * (s[i] + s[j])/m[i][j]
         loss = sum_ / self.class_number ** 2
-        return loss #+ torch.sum(torch.abs(centroids))/100
+        return loss
 
-    def forward(self, predicted, target, epoch):
-        self.epoch_count+=1
+    def forward(self, predicted, target):
+        self.epoch_count += 1
         if self.epoch_count > self.recalculate_period or self.sum is None:
             self.init_tensors(predicted, target)
             self.recalculate_centroids()
@@ -121,3 +99,11 @@ class DaviesBouldinLossFunction(nn.Module):
             self.epoch_count = 0
         loss = self.calculate_loss(predicted, target)
         return loss
+
+    @abstractmethod
+    def recalculate_centroids(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def recalculate_distances(self):
+        raise NotImplementedError

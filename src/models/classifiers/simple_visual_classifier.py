@@ -51,7 +51,7 @@ class SimpleVisualClassifier(nn.Module):
                 # forward + backward + optimize
                 outputs = self.forward(inputs)
                 outputs = outputs.to(config["training"]["device"])
-                loss = criterion(outputs, labels, epoch)
+                loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
@@ -65,11 +65,12 @@ class SimpleVisualClassifier(nn.Module):
         time_elapsed = time.time() - since
         mlflow.log_metric("Training time", time_elapsed)
 
-    def validate(self, config, optimizer, criterion, test_loader, vector_to_label_transformer = None):
+    def validate(self, config, test_loader, metrics, vector_to_label_transformer=None):
         total_loss = 0.0
         total_number = 0
-        metric = MulticlassAccuracy(num_classes=10).to(config["training"]["device"])
-
+        losses = {}
+        for i in metrics.keys():
+            losses[i] = 0
         with torch.no_grad():
             for i, data in enumerate(test_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
@@ -81,11 +82,11 @@ class SimpleVisualClassifier(nn.Module):
                 outputs = outputs.to(config["training"]["device"])
                 if vector_to_label_transformer:
                     outputs = vector_to_label_transformer.predict(outputs)
-                loss = metric(outputs, labels)
-                total_loss += loss.item()
-                print(loss)
-                #print(outputs, labels)
-                total_number += 1
+                for i in metrics.keys():
+                    losses[i] += metrics[i].calculate(outputs, labels)
+                total_number += labels.size(0)
 
-        print(f"Finished validaion, avg loss: {total_loss / total_number}")
-        mlflow.log_metric("Avg test loss", total_loss / total_number)
+        for i in metrics.keys():
+            print(f"Finished validaion")
+            print(f"{i}: {losses[i]/total_number}")
+            mlflow.log_metric(i, losses[i]/total_number)

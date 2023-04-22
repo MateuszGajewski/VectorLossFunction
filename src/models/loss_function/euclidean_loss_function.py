@@ -1,9 +1,9 @@
 import torch
-import torch.nn as nn
+from .abstract_loss_function import AbstractLossFunction
 
 
-class EuclideanLossFunction(nn.Module):
-    def __init__(self, json = None) -> None:
+class EuclideanLossFunction(AbstractLossFunction):
+    def __init__(self, json=None) -> None:
         super(EuclideanLossFunction, self).__init__()
         self.class_number = self.get_class_number(json)
 
@@ -19,7 +19,7 @@ class EuclideanLossFunction(nn.Module):
             class_number += len(json[i])
         return class_number
 
-    def forward(self, predicted, target, epoch=0):
+    def forward(self, predicted, target):
         target = target.reshape(target.shape[0], 1)
         loss = torch.linalg.vector_norm(target - predicted, dim=1)
         loss = torch.sum(loss)

@@ -68,23 +68,22 @@ class Experiment:
         )
 
     def train_and_log_model(self):
-        with mlflow.start_run() as run:
-            mlflow.log_param("train_dataset", self.config["data"]["train_data"])
-            mlflow.log_param("test_dataset", self.config["data"]["test_data"])
-            mlflow.log_param("model name", self.config["training"]["classifier"])
-            mlflow.log_param("number of dimensions", self.config["training"]["out_dim"])
-            mlflow.log_param("Batch size", self.config["training"]["batch_size"])
-            mlflow.log_param("epochs", self.config["training"]["epochs"])
-            mlflow.log_param("learning_rate", self.config["training"]["lr"])
-            mlflow.log_param("momentum", self.config["training"]["momentum"])
-            mlflow.log_param("loss_functon", self.config['training']['loss_function'])
-            mlflow.log_param("vector_to_label_transformer",
-                             self.config["inference"]["vector_to_label_transformer"])
-            if self.config.has_option('training', 'recalculate_period'):
-                mlflow.log_param( 'recalculate_period' ,self.config['training']['recalculate_period'])
-            self.train()
-            self.validate()
-            self.save_model(self.cls)
+        mlflow.log_param("train_dataset", self.config["data"]["train_data"])
+        mlflow.log_param("test_dataset", self.config["data"]["test_data"])
+        mlflow.log_param("model name", self.config["training"]["classifier"])
+        mlflow.log_param("number of dimensions", self.config["training"]["out_dim"])
+        mlflow.log_param("Batch size", self.config["training"]["batch_size"])
+        mlflow.log_param("epochs", self.config["training"]["epochs"])
+        mlflow.log_param("learning_rate", self.config["training"]["lr"])
+        mlflow.log_param("momentum", self.config["training"]["momentum"])
+        mlflow.log_param("loss_functon", self.config['training']['loss_function'])
+        mlflow.log_param("vector_to_label_transformer",
+                         self.config["inference"]["vector_to_label_transformer"])
+        if self.config.has_option('training', 'recalculate_period'):
+            mlflow.log_param( 'recalculate_period' ,self.config['training']['recalculate_period'])
+        self.train()
+        self.validate()
+        self.save_model(self.cls)
 
     def train(self):
         self.cls.fit(self.config, self.optimizer, self.criterion, self.train_loader,

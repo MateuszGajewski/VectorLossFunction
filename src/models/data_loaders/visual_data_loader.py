@@ -42,9 +42,14 @@ class VisualDataLoader:
             shuffle=True,
             pin_memory=True,
         )
-        cls = eval(config["training"]["classifier"])(
-            int(config["training"]["out_dim"])
-        ).to(config["training"]["device"])
-
+        if config.has_option('training', 'softmax_layer') \
+                and config['training']['softmax_layer'] == 'True':
+            cls = eval(config["training"]["classifier"])(
+                int(config["training"]["out_dim"]), True
+            ).to(config["training"]["device"])
+        else:
+            cls = eval(config["training"]["classifier"])(
+                int(config["training"]["out_dim"])
+            ).to(config["training"]["device"])
 
         return train_loader, test_loader, cls

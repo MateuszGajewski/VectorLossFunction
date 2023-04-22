@@ -11,8 +11,9 @@ class SimpleVisualClassifier(nn.Module):
     def __str__(self):
         return "Simple_Visual_Cassifier"
 
-    def __init__(self, out_dim=3):
+    def __init__(self, out_dim=3, softmax_layer=False):
         super().__init__()
+        self.softmax_layer = softmax_layer
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
@@ -31,16 +32,17 @@ class SimpleVisualClassifier(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
+        if self.softmax_layer:
+            x = F.log_softmax(x, dim=1)
         return x
 
-    def fit(self, config, optimizer, criterion, train_loader, vector_to_label_transformer = None):
+    def fit(self, config, optimizer, criterion, train_loader, vector_to_label_transformer=None):
         since = time.time()
-        criterion.assign_data_loader(train_loader)
-        criterion.assign_model(self)
         for epoch in range(
             int(config["training"]["epochs"])
         ):  # loop over the dataset multiple times
             running_loss = 0.0
+            epoch_loss = 0.0
             for i, data in enumerate(train_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = data
@@ -55,9 +57,12 @@ class SimpleVisualClassifier(nn.Module):
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
+                epoch_loss += loss.item()
                 if i % 10 == 1:
                     print(f"[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.5f}")
                     running_loss = 0.0
+            mlflow.log_metric('loss', epoch_loss, epoch)
+
         if vector_to_label_transformer:
             vector_to_label_transformer.fit(criterion)
             print(criterion.get_centroids())
@@ -71,6 +76,7 @@ class SimpleVisualClassifier(nn.Module):
         losses = {}
         for i in metrics.keys():
             losses[i] = 0
+        print(losses)
         with torch.no_grad():
             for i, data in enumerate(test_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
@@ -82,8 +88,10 @@ class SimpleVisualClassifier(nn.Module):
                 outputs = outputs.to(config["training"]["device"])
                 if vector_to_label_transformer:
                     outputs = vector_to_label_transformer.predict(outputs)
-                for i in metrics.keys():
-                    losses[i] += metrics[i].calculate(outputs, labels)
+                elif outputs.shape[1] == 10:
+                    _, outputs = torch.max(outputs.data, 1)
+                for j in metrics.keys():
+                    losses[j] += metrics[j].calculate(outputs, labels)
                 total_number += labels.size(0)
 
         for i in metrics.keys():

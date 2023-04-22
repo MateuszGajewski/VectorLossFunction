@@ -31,6 +31,10 @@ class Experiment:
         self.metrics = {}
         mlflow.set_tracking_uri("../../mlruns")
         mlflow.set_experiment(self.config["training"]["experiment"])
+        mlflow.start_run()
+
+    def __del__(self):
+        mlflow.end_run()
 
     def save_model(self, model_ft):
         mlflow.pytorch.log_model(model_ft, str(model_ft))
@@ -104,8 +108,9 @@ class Experiment:
 
 
 if __name__ == "__main__":
-    experiment = Experiment(Path("./configs/visual_config_softmax_cross_entropy.ini"))
+    ...
+    #experiment = Experiment(Path("./configs/visual_config_softmax_cross_entropy.ini"))
     #experiment = Experiment(Path("./configs/visual_config_davies_bouldin.ini"))
-    experiment.build_objects()
-    experiment.build_metrics()
-    experiment.train_and_log_model()
+    #experiment.build_objects()
+    #experiment.build_metrics()
+    #experiment.train_and_log_model()

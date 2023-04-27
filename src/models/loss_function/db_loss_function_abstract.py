@@ -35,7 +35,7 @@ class DBLossFunctionAbstract(AbstractLossFunction):
     def init_tensors(self, predicted, target):
         out_dimension = predicted.shape[1]
         self.sum = torch.zeros(self.class_number, out_dimension).to(self.device)
-        self.count = torch.zeros(self.class_number, 1).to(self.device)
+        self.count = torch.ones(self.class_number, 1).to(self.device) #for numeric stability?
         self.centroids = torch.zeros(self.class_number, 1).to(self.device)
         self.distances = torch.zeros(self.class_number, 1).to(self.device)
 

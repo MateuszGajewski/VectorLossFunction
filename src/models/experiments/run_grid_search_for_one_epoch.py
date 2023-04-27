@@ -38,4 +38,4 @@ def set_value_in_property_file(file_path, batch_size, recalculate_period, out_di
 
 
 if __name__ == '__main__':
-    run_grid_search(Path("./configs/visual_config_davis_bouldin_grid_search.ini"))
+    run_grid_search(Path("./configs/visual_config_davis_bouldin_grid_search_one_epoch.ini"))

@@ -12,11 +12,12 @@ class DBLossFunctionApprox(DBLossFunctionAbstract):
 
     def recalculate_centroids(self):
         dataset_size = len(self.data_loader.dataset)
-        batch_num = len(self.data_loader)
-        sample_size = int(np.ceil(dataset_size * self.approx_size/ (dataset_size/batch_num)))
+        sample_size = int(np.ceil(dataset_size * self.approx_size))
         indx = np.random.randint(len(self.data_loader), size=sample_size)
+        subset = torch.utils.data.Subset(self.data_loader.dataset, indx)
+        testloader_subset = torch.utils.data.DataLoader(subset, batch_size=1024, num_workers=0, shuffle=False)
         with torch.no_grad():
-            for i, data in enumerate(self.data_loader, 0):
+            for i, data in enumerate(testloader_subset, 0):
                 if i in indx:
                     inputs, labels = data
                     inputs = inputs.to(self.device)
@@ -28,11 +29,12 @@ class DBLossFunctionApprox(DBLossFunctionAbstract):
 
     def recalculate_distances(self):
         dataset_size = len(self.data_loader.dataset)
-        batch_num = len(self.data_loader)
-        sample_size = int(np.ceil(dataset_size * self.approx_size / (dataset_size / batch_num)))
+        sample_size = int(np.ceil(dataset_size * self.approx_size))
         indx = np.random.randint(len(self.data_loader), size=sample_size)
+        subset = torch.utils.data.Subset(self.data_loader.dataset, indx)
+        testloader_subset = torch.utils.data.DataLoader(subset, batch_size=1024, num_workers=0, shuffle=False)
         with torch.no_grad():
-            for i, data in enumerate(self.data_loader, 0):
+            for i, data in enumerate(testloader_subset, 0):
                 if i in indx:
                     inputs, labels = data
                     inputs = inputs.to(self.device)

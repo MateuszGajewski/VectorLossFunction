@@ -70,8 +70,7 @@ class DBLossFunctionAbstract(AbstractLossFunction):
             class_number += len(json[i])
         return class_number
 
-    def calculate_loss(self, predicted, target):
-        centroids = self.centroids.detach().clone().to(self.device)
+    def calculate_distances_update(self, predicted, target, centroids):
         s = self.distances.detach().clone().to(self.device)  # coherence in class
         selected_counts = torch.index_select(self.count, 0, target)
         selected_centroids = torch.index_select(centroids, 0, target)
@@ -81,16 +80,22 @@ class DBLossFunctionAbstract(AbstractLossFunction):
         s.index_add_(0, target, vec.reshape(target.shape[0], 1))
         s = torch.sqrt(s)
         s = s / self.count
+
+        return s
+
+    def calculate_loss(self, predicted, target):
+        centroids = self.centroids.detach().clone().to(self.device)
+        s = self.calculate_distances_update(predicted, target, centroids)
         m = torch.cdist(centroids, centroids, p=2).to(self.device)  # class centrioids separation
         sum_ = torch.zeros(1).to(self.device)
         for i in range(0, self.class_number):
             for j in range(0, self.class_number):
                 if i != j:
-                    sum_ += self.class_weights_matrix[i][j] * (s[i] + s[j])/m[i][j]
+                    sum_ += self.class_weights_matrix[i][j] * (s[i] + s[j])/(m[i][j])
         loss = sum_ / self.class_number ** 2
         return loss
 
-    def forward(self, predicted, target):
+    def forward(self, predicted, target, epoch=0):
         self.epoch_count += 1
         if self.epoch_count > self.recalculate_period or self.sum is None:
             self.init_tensors(predicted, target)

@@ -14,10 +14,7 @@ class DBLossFunctionApproxLogLossDetail(DBLossFunctionApprox):
         mlflow.log_metric('loss_function-points_distances', torch.sum(s))
         mlflow.log_metric('loss_function-centroids_distances', torch.sum(m))
 
-    def freeze_centroids(self):
-        ...
-
-    def forward(self, predicted, target):
+    def forward(self, predicted, target, epoch=0):
         self.epoch_count += 1
         if self.epoch_count > self.recalculate_period or self.sum is None:
             self.init_tensors(predicted, target)

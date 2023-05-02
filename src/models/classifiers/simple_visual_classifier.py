@@ -62,7 +62,7 @@ class SimpleVisualClassifier(nn.Module):
                 # forward + backward + optimize
                 outputs = self.forward(inputs)
                 outputs = outputs.to(config["training"]["device"])
-                loss = criterion(outputs, labels)
+                loss = criterion(outputs, labels, epoch)
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()

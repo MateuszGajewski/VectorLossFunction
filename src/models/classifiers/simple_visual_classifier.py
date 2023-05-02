@@ -11,7 +11,13 @@ class SimpleVisualClassifier(nn.Module):
     def __str__(self):
         return "Simple_Visual_Cassifier"
 
+    def init_max_metrics(self, metrics):
+        self.max_metrics = {}
+        for i in metrics.keys():
+            self.max_metrics[i] = 0
+
     def __init__(self, out_dim=3, softmax_layer=False):
+        self.max_metrics = None
         super().__init__()
         self.softmax_layer = softmax_layer
         self.conv1 = nn.Conv2d(1, 6, 5)
@@ -38,6 +44,8 @@ class SimpleVisualClassifier(nn.Module):
 
     def fit(self, config, optimizer, criterion, train_loader, vector_to_label_transformer=None,
             test_loader=None, metrics=None):
+        if metrics is not None:
+            self.init_max_metrics(metrics)
         since = time.time()
         for epoch in range(
                 int(config["training"]["epochs"])
@@ -75,8 +83,13 @@ class SimpleVisualClassifier(nn.Module):
         print("Finished Training")
         time_elapsed = time.time() - since
         mlflow.log_metric("Training time", time_elapsed)
+        if test_loader is not None:
+            for i in metrics.keys():
+                mlflow.log_metric("max_value_"+ i, self.max_metrics[i])
+
 
     def validate(self, config, test_loader, metrics, vector_to_label_transformer=None, step=None):
+
         total_loss = 0.0
         total_number = 0
         losses = {}
@@ -103,7 +116,10 @@ class SimpleVisualClassifier(nn.Module):
         for i in metrics.keys():
             print(f"Finished validaion")
             print(f"{i}: {losses[i] / total_number}")
+            m = losses[i] / total_number
+            if m > self.max_metrics[i]:
+                self.max_metrics[i] = m
             if step is not None:
-                mlflow.log_metric(i, losses[i] / total_number, step)
+                mlflow.log_metric(i, m, step)
             else:
-                mlflow.log_metric(i, losses[i] / total_number)
+                mlflow.log_metric(i, m)

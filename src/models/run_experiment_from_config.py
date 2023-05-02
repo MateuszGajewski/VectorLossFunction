@@ -29,6 +29,7 @@ class Experiment:
         self.config.read(config_file_path)
         self.label_hierarchy = None
         self.metrics = {}
+        self.validate_after_epoch = False
         mlflow.set_tracking_uri("../../../mlruns")
         mlflow.set_experiment(self.config["training"]["experiment"])
         if name is None:
@@ -52,6 +53,9 @@ class Experiment:
         self.device = self.config["training"]["device"]
         if self.config.has_option('data', 'labels_hierarchy'):
             self.label_hierarchy = json.load(open(self.config['data']['labels_hierarchy']))
+
+        if self.config.has_option('training', 'validate_after_epoch'):
+            self.validate_after_epoch = self.config.getboolean('training', 'validate_after_epoch')
 
         if self.config.has_option('data', 'labels_hierarchy') \
                 and (self.config["training"]["loss_function"]).split('.')[0] == 'loss_function':
@@ -102,11 +106,16 @@ class Experiment:
         self.save_model(self.cls)
 
     def train(self):
-        self.cls.fit(self.config, self.optimizer, self.criterion, self.train_loader,
+        if self.validate_after_epoch:
+            self.cls.fit(self.config, self.optimizer, self.criterion, self.train_loader,
+                         self.vector_to_label_transformer, self.test_loader, self.metrics)
+        else:
+            self.cls.fit(self.config, self.optimizer, self.criterion, self.train_loader,
                      self.vector_to_label_transformer)
 
     def validate(self):
-        self.cls.validate(self.config, self.test_loader, self.metrics,
+        if not self.validate_after_epoch:
+            self.cls.validate(self.config, self.test_loader, self.metrics,
                           self.vector_to_label_transformer)
 
 

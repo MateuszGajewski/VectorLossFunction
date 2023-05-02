@@ -23,7 +23,7 @@ class SimpleVisualClassifier(nn.Module):
         for m in self.modules():
             if isinstance(m, nn.Linear):
                 nn.init.xavier_uniform_(m.weight)
-                #m.bias.data.fill_(0.01)
+                # m.bias.data.fill_(0.01)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -36,10 +36,11 @@ class SimpleVisualClassifier(nn.Module):
             x = F.log_softmax(x, dim=1)
         return x
 
-    def fit(self, config, optimizer, criterion, train_loader, vector_to_label_transformer=None):
+    def fit(self, config, optimizer, criterion, train_loader, vector_to_label_transformer=None,
+            test_loader=None, metrics=None):
         since = time.time()
         for epoch in range(
-            int(config["training"]["epochs"])
+                int(config["training"]["epochs"])
         ):  # loop over the dataset multiple times
             running_loss = 0.0
             epoch_loss = 0.0
@@ -62,6 +63,11 @@ class SimpleVisualClassifier(nn.Module):
                     print(f"[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.5f}")
                     running_loss = 0.0
             mlflow.log_metric('loss', epoch_loss, epoch)
+            if test_loader is not None:
+                if vector_to_label_transformer:
+                    vector_to_label_transformer.fit(criterion)
+                self.validate(config, test_loader, metrics,
+                              vector_to_label_transformer, epoch)
 
         if vector_to_label_transformer:
             vector_to_label_transformer.fit(criterion)
@@ -70,7 +76,7 @@ class SimpleVisualClassifier(nn.Module):
         time_elapsed = time.time() - since
         mlflow.log_metric("Training time", time_elapsed)
 
-    def validate(self, config, test_loader, metrics, vector_to_label_transformer=None):
+    def validate(self, config, test_loader, metrics, vector_to_label_transformer=None, step=None):
         total_loss = 0.0
         total_number = 0
         losses = {}
@@ -96,5 +102,8 @@ class SimpleVisualClassifier(nn.Module):
 
         for i in metrics.keys():
             print(f"Finished validaion")
-            print(f"{i}: {losses[i]/total_number}")
-            mlflow.log_metric(i, losses[i]/total_number)
+            print(f"{i}: {losses[i] / total_number}")
+            if step is not None:
+                mlflow.log_metric(i, losses[i] / total_number, step)
+            else:
+                mlflow.log_metric(i, losses[i] / total_number)

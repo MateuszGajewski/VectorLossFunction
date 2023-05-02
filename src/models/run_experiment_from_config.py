@@ -17,7 +17,7 @@ import torch.nn as nn
 
 
 class Experiment:
-    def __init__(self, config_file_path: Path):
+    def __init__(self, config_file_path: Path, name=None):
         self.vector_to_label_transformer = None
         self.criterion = None
         self.train_loader = None
@@ -29,9 +29,12 @@ class Experiment:
         self.config.read(config_file_path)
         self.label_hierarchy = None
         self.metrics = {}
-        mlflow.set_tracking_uri("../../mlruns")
+        mlflow.set_tracking_uri("../../../mlruns")
         mlflow.set_experiment(self.config["training"]["experiment"])
-        mlflow.start_run()
+        if name is None:
+            mlflow.start_run()
+        else:
+            mlflow.start_run(run_name=name)
 
     def __del__(self):
         mlflow.end_run()
@@ -111,6 +114,7 @@ if __name__ == "__main__":
     ...
     #experiment = Experiment(Path("./configs/visual_config_softmax_cross_entropy.ini"))
     #experiment = Experiment(Path("./configs/visual_config_davies_bouldin.ini"))
+    #experiment = Experiment(Path("./configs/text_config_davies_bouldin.ini"))
     #experiment.build_objects()
     #experiment.build_metrics()
     #experiment.train_and_log_model()

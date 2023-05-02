@@ -28,7 +28,7 @@ class TextDataLoader:
             processed_text = torch.tensor(text_pipeline(_text), dtype=torch.int64)
             text_list.append(processed_text)
             offsets.append(processed_text.size(0))
-        label_list = torch.stack(label_list)
+        label_list = torch.tensor(label_list)
         offsets = torch.tensor(offsets[:-1]).cumsum(dim=0)
         text_list = torch.cat(text_list)
         return (

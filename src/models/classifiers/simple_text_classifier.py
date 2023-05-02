@@ -30,10 +30,11 @@ class SimpleTextClassifier(nn.Module):
         self.train()
         for epoch in range(int(config["training"]["epochs"])):
             running_loss = 0.0
-            for i, (label, text, offsets) in enumerate(train_loader):
+            for i, (label, text, offsets) in enumerate(train_loader, 0):
                 optimizer.zero_grad()
                 text = text.to(config["training"]["device"])
                 label = label.to(config["training"]["device"])
+                offsets = offsets.to(config["training"]["device"])
                 outputs = self.forward(text, offsets)
                 outputs = outputs.to(config["training"]["device"])
                 loss = criterion(outputs, label)
@@ -49,22 +50,31 @@ class SimpleTextClassifier(nn.Module):
             time_elapsed = time.time() - since
             mlflow.log_metric("Training time", time_elapsed)
 
-    def validate(self, config, optimizer, criterion, test_loader, vector_to_label_transformer = None):
+    def validate(self, config, test_loader, metrics, vector_to_label_transformer=None):
         total_loss = 0.0
         total_number = 0
+        losses = {}
+        for i in metrics.keys():
+            losses[i] = 0
+        print(losses)
         with torch.no_grad():
-            for i, (label, text, offsets) in enumerate(test_loader):
+            for i, data in enumerate(test_loader, 0):
+                label, text, offsets = data
                 # get the inputs; data is a list of [inputs, labels]
                 text = text.to(config["training"]["device"])
                 labels = label.to(config["training"]["device"])
-                # forward + backward + optimize
+                offsets = offsets.to(config["training"]["device"])
                 outputs = self.forward(text, offsets)
                 outputs = outputs.to(config["training"]["device"])
                 if vector_to_label_transformer:
                     outputs = vector_to_label_transformer.predict(outputs)
-                loss = criterion(outputs, labels)
-                total_loss += loss.item()
+                elif outputs.shape[1] == 10:
+                    _, outputs = torch.max(outputs.data, 1)
+                for j in metrics.keys():
+                    losses[j] += metrics[j].calculate(outputs, labels)
                 total_number += labels.size(0)
 
-        print(f"Finished validaion, avg loss: {total_loss / total_number}")
-        mlflow.log_metric("Avg test loss", total_loss / total_number)
+            for i in metrics.keys():
+                print(f"Finished validaion")
+                print(f"{i}: {losses[i] / total_number}")
+                mlflow.log_metric(i, losses[i] / total_number)

@@ -5,7 +5,7 @@ from .db_loss_function_abstract import DBLossFunctionAbstract
 
 
 class DBLossFunctionApprox(DBLossFunctionAbstract):
-    def __init__(self, device='cpu', json=None, approx_size=0.01):
+    def __init__(self, device='cpu', json=None, approx_size=0.05):
         super(DBLossFunctionApprox, self).__init__(device, json)
         mlflow.log_param('approx_size', approx_size)
         self.approx_size = approx_size
@@ -18,13 +18,12 @@ class DBLossFunctionApprox(DBLossFunctionAbstract):
         testloader_subset = torch.utils.data.DataLoader(subset, batch_size=sample_size-1, num_workers=0, shuffle=False)
         with torch.no_grad():
             for i, data in enumerate(testloader_subset, 0):
-                if i in indx:
-                    inputs, labels = data
-                    inputs = inputs.to(self.device)
-                    labels = labels.to(self.device)
-                    outputs = self.model.forward(inputs)
-                    outputs.to(self.device)
-                    self.update_centroids(outputs, labels)
+                inputs, labels = data
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+                outputs = self.model.forward(inputs)
+                outputs.to(self.device)
+                self.update_centroids(outputs, labels)
         self.calculate_centroids()
 
     def recalculate_distances(self):
@@ -35,11 +34,10 @@ class DBLossFunctionApprox(DBLossFunctionAbstract):
         testloader_subset = torch.utils.data.DataLoader(subset, batch_size=sample_size-1, num_workers=0, shuffle=False)
         with torch.no_grad():
             for i, data in enumerate(testloader_subset, 0):
-                if i in indx:
-                    inputs, labels = data
-                    inputs = inputs.to(self.device)
-                    labels = labels.to(self.device)
-                    outputs = self.model.forward(inputs)
-                    outputs.to(self.device)
-                    self.update_distances(outputs, labels)
+                inputs, labels = data
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+                outputs = self.model.forward(inputs)
+                outputs.to(self.device)
+                self.update_distances(outputs, labels)
 

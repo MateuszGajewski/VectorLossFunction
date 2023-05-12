@@ -1,6 +1,7 @@
 import torch
 from .abstract_loss_function import AbstractLossFunction
 from abc import abstractmethod
+import mlflow
 
 
 class DBLossFunctionAbstract(AbstractLossFunction):
@@ -18,9 +19,13 @@ class DBLossFunctionAbstract(AbstractLossFunction):
         self.class_weights_matrix = self.build_class_weight_matrix(json)
         self.epoch_count = 0
         self.recalculate_period = 0
+        self.log_loss = False
 
     def set_recalculate_period(self, recalculate_period):
         self.recalculate_period = int(recalculate_period)
+
+    def set_log_loss(self, log_loss):
+        self.log_loss = log_loss
 
     def assign_model(self, model):
         self.model = model
@@ -83,6 +88,14 @@ class DBLossFunctionAbstract(AbstractLossFunction):
 
         return s
 
+    def calculate_centroids_update(self, predicted, target, centroids):
+        selected_counts = torch.index_select(self.count, 0, target)
+        selected_centroids = torch.index_select(centroids, 0, target)
+        centroids.index_add_(0, target, predicted/ selected_counts)
+        vec = torch.linalg.vector_norm(centroids, dim=1)
+        sum_ = torch.sum(vec)
+        return sum_
+
     def calculate_loss(self, predicted, target):
         centroids = self.centroids.detach().clone().to(self.device)
         s = self.calculate_distances_update(predicted, target, centroids)
@@ -95,6 +108,13 @@ class DBLossFunctionAbstract(AbstractLossFunction):
         loss = sum_ / self.class_number ** 2
         return loss
 
+    def log_loss_details(self, predicted, target):
+        centroids = self.centroids.detach().clone().to(self.device)
+        s = self.calculate_distances_update(predicted, target, centroids)
+        m = torch.cdist(centroids, centroids, p=2).to(self.device)  # class centrioids separation
+        mlflow.log_metric('loss_function-points_distances', torch.sum(s))
+        mlflow.log_metric('loss_function-centroids_distances', torch.sum(m))
+
     def forward(self, predicted, target, epoch=0):
         self.epoch_count += 1
         if self.epoch_count > self.recalculate_period or self.sum is None:
@@ -103,6 +123,9 @@ class DBLossFunctionAbstract(AbstractLossFunction):
             self.recalculate_distances()
             self.epoch_count = 0
         loss = self.calculate_loss(predicted, target)
+        if self.log_loss:
+            self.log_loss_details(predicted, target)
+
         return loss
 
     @abstractmethod

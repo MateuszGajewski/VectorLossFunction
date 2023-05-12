@@ -59,8 +59,12 @@ class Experiment:
 
         if self.config.has_option('data', 'labels_hierarchy') \
                 and (self.config["training"]["loss_function"]).split('.')[0] == 'loss_function':
+            if self.config.has_option('training', 'log_details'):
+                log_loss = self.config.getboolean('training', 'log_details')
+
             self.criterion = eval(self.config["training"]["loss_function"])(self.device,
                                                                             self.label_hierarchy)
+            self.criterion.set_log_loss(log_loss)
         else:
             self.criterion = eval(self.config["training"]["loss_function"])()
 

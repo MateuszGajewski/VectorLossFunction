@@ -3,9 +3,9 @@ import mlflow
 import torch
 
 
-class DBLossFunctionApproxLogLossDetailFreezeCentroids(DBLossFunctionApprox):
+class DBLossFunctionApproxFreezeCentroids(DBLossFunctionApprox):
     def __init__(self, device='cpu', json=None, approx_size=0.05):
-        super(DBLossFunctionApproxLogLossDetailFreezeCentroids, self).\
+        super(DBLossFunctionApproxFreezeCentroids, self).\
             __init__(device, json, approx_size)
         self.freeze_period = 2
         mlflow.log_param('freeze_period', self.freeze_period)
@@ -26,7 +26,7 @@ class DBLossFunctionApproxLogLossDetailFreezeCentroids(DBLossFunctionApprox):
         for i in range(0, self.class_number):
             for j in range(0, self.class_number):
                 if i != j:
-                    sum_ += self.class_weights_matrix[i][j] * (s[i] + s[j])#/(m[i][j])
+                    sum_ += self.class_weights_matrix[i][j] * (s[i] + s[j])/(m[i][j])
         loss = sum_ / self.class_number ** 2
         return loss
 
@@ -41,5 +41,6 @@ class DBLossFunctionApproxLogLossDetailFreezeCentroids(DBLossFunctionApprox):
             loss = self.calculate_loss(predicted, target)
         else:
             loss = self.calculate_freeze_loss(predicted, target)
-        self.log_loss_details(predicted, target)
+        if self.log_loss:
+            self.log_loss_details(predicted, target)
         return loss

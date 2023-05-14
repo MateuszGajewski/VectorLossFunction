@@ -4,11 +4,11 @@ from pathlib import Path
 
 
 def run_grid_search(file: Path):
-    batch_size = [8, 16, 32, 64, 128, 256, 1024, 2048]
+    batch_size = [128, 256, 1024, 2048]
     batch_size.reverse()
     recalculate_period = [0, 5, 10, 20, 100, 200]
     recalculate_period.reverse()
-    out_dim = [1, 2, 3, 8]
+    out_dim = [1, 2, 3]
     out_dim.reverse()
     learning_rate = [0.0001, 0.001, 0.005, 0.01]
     for batch_size_ in batch_size:

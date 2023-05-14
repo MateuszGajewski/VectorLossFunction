@@ -92,12 +92,13 @@ class DBLossFunctionAbstract(AbstractLossFunction):
         selected_counts = torch.index_select(self.count, 0, target)
         selected_centroids = torch.index_select(centroids, 0, target)
         centroids.index_add_(0, target, predicted/ selected_counts)
-        vec = torch.linalg.vector_norm(centroids, dim=1)
-        sum_ = torch.sum(vec)
-        return sum_
+        #vec = torch.linalg.vector_norm(centroids, dim=1)
+        #sum_ = torch.sum(vec)
+        return centroids
 
     def calculate_loss(self, predicted, target):
         centroids = self.centroids.detach().clone().to(self.device)
+        centroids = self.calculate_centroids_update(predicted, target, centroids)
         s = self.calculate_distances_update(predicted, target, centroids)
         m = torch.cdist(centroids, centroids, p=2).to(self.device)  # class centrioids separation
         sum_ = torch.zeros(1).to(self.device)

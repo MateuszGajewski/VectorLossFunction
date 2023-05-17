@@ -6,10 +6,17 @@ class DBLossFunctionNaive(DBLossFunctionAbstract):
     def recalculate_centroids(self):
         with torch.no_grad():
             for i, data in enumerate(self.data_loader, 0):
-                inputs, labels = data
+                if len(data) == 2:
+                    inputs, labels = data
+                else:
+                    labels, inputs, offsets = data
+                    offsets = offsets.to(self.device)
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
-                outputs = self.model.forward(inputs)
+                if len(data) == 2:
+                    outputs = self.model.forward(inputs)
+                else:
+                    outputs = self.model.forward(inputs, offsets)
                 outputs.to(self.device)
                 self.update_centroids(outputs, labels)
         self.calculate_centroids()
@@ -17,9 +24,16 @@ class DBLossFunctionNaive(DBLossFunctionAbstract):
     def recalculate_distances(self):
         with torch.no_grad():
             for i, data in enumerate(self.data_loader, 0):
-                inputs, labels = data
+                if len(data) == 2:
+                    inputs, labels = data
+                else:
+                    labels, inputs, offsets = data
+                    offsets = offsets.to(self.device)
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
-                outputs = self.model.forward(inputs)
+                if len(data) == 2:
+                    outputs = self.model.forward(inputs)
+                else:
+                    outputs = self.model.forward(inputs, offsets)
                 outputs.to(self.device)
                 self.update_distances(outputs, labels)

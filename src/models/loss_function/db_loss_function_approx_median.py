@@ -15,7 +15,9 @@ class DBLossFunctionApproxMedian(DBLossFunctionApprox):
         indx = np.random.randint(len(self.data_loader), size=sample_size)
         subset = torch.utils.data.Subset(self.data_loader.dataset, indx)
         testloader_subset = torch.utils.data.DataLoader(subset, batch_size=sample_size, num_workers=0,
-                                                        shuffle=False)
+                                                        shuffle=True,
+                                                        collate_fn = self.data_loader.collate_fn
+                                                        )
         with torch.no_grad():
             for i, data in enumerate(testloader_subset, 0):
                 inputs, labels = data

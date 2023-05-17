@@ -4,10 +4,10 @@ from abc import abstractmethod
 import mlflow
 
 
-class DBLossFunctionModifiedApprox(DBLossFunctionApprox):
+class DBLossFunctionModifiedApproxFreezeCentroids(DBLossFunctionApprox):
 
     def __init__(self, device='cpu', json=None):
-        super(DBLossFunctionModifiedApprox, self).__init__(device, json)
+        super(DBLossFunctionModifiedApproxFreezeCentroids, self).__init__(device, json)
         self.device = device
         self.data_loader = None
         self.model = None
@@ -20,6 +20,8 @@ class DBLossFunctionModifiedApprox(DBLossFunctionApprox):
         self.epoch_count = 0
         self.recalculate_period = 0
         self.log_loss = False
+        self.freeze_period = 2
+        mlflow.log_param('freeze_period', self.freeze_period)
 
     def calculate_distances_update(self, predicted, target, centroids):
         s = torch.zeros(self.class_number, 1).to(self.device)
@@ -52,9 +54,45 @@ class DBLossFunctionModifiedApprox(DBLossFunctionApprox):
         for i in range(0, self.class_number):
             for j in range(0, self.class_number):
                 if i != j:
-                    sum_ +=  0.1*(s[i] + s[j]) / (m[i][j])
+                    sum_ +=  (s[i] + s[j]) / (m[i][j])
                     #self.class_weights_matrix[i][j] *
         loss = sum_ / self.class_number ** 2
+        return loss
+
+    def calculate_loss_(self, predicted, target):
+        centroids = self.centroids.detach().clone().to(self.device)
+        #centroids = self.calculate_centroids_update(predicted, target, centroids)
+        s = self.calculate_distances_update(predicted, target, centroids)
+        centroids = self.calculate_centroids_update(predicted, target, centroids)
+        m = torch.cdist(centroids, centroids, p=2).to(self.device)  # class centrioids separation
+        sum_ = torch.zeros(1).to(self.device)
+        for i in range(0, self.class_number):
+            for j in range(0, self.class_number):
+                if i != j:
+                    sum_ +=  (s[i] + s[j]) #/ (m[i][j])
+                    #self.class_weights_matrix[i][j] *
+        loss = sum_ / self.class_number ** 2
+        return loss
+
+
+
+
+    def forward(self, predicted, target, epoch):
+        self.epoch_count += 1
+        if self.epoch_count > self.recalculate_period or self.sum is None:# or epoch == 0:
+            self.init_tensors(predicted, target)
+            self.recalculate_centroids()
+            self.recalculate_distances()
+            self.epoch_count = 0
+
+        if epoch > self.freeze_period:
+            loss = self.calculate_loss_(predicted, target)
+            self.epoch_count = 0
+        else:
+            loss = self.calculate_loss(predicted, target)
+
+        if self.log_loss:
+            self.log_loss_details(predicted, target)
         return loss
 
 

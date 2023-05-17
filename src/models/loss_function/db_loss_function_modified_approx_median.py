@@ -1,13 +1,13 @@
 import torch
-from .db_loss_function_approx import DBLossFunctionApprox
+from .db_loss_function_approx_median import DBLossFunctionApproxMedian
 from abc import abstractmethod
 import mlflow
 
 
-class DBLossFunctionModifiedApprox(DBLossFunctionApprox):
+class DBLossFunctionModifiedApproxMedian(DBLossFunctionApproxMedian):
 
     def __init__(self, device='cpu', json=None):
-        super(DBLossFunctionModifiedApprox, self).__init__(device, json)
+        super(DBLossFunctionModifiedApproxMedian, self).__init__(device, json)
         self.device = device
         self.data_loader = None
         self.model = None

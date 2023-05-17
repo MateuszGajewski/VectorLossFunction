@@ -47,7 +47,7 @@ class SimpleTextClassifier(nn.Module):
                 optimizer.zero_grad()
                 # forward + backward + optimize
                 outputs = self.forward(inputs, offsets)
-
+                print(labels)
                 outputs = outputs.to(config["training"]["device"])
                 loss = criterion(outputs, labels, epoch)
                 loss.backward()

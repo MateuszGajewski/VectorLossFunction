@@ -20,7 +20,8 @@ class CoulombLossFunction(AbstractLossFunction):
         self.epoch_count = 0
         self.recalculate_period = 0
         self.log_loss = False
-        self.approx_size = 0.2
+        self.approx_size = 0.1
+        self.epsilon = 1
 
     def set_recalculate_period(self, recalculate_period):
         self.recalculate_period = int(recalculate_period)
@@ -95,21 +96,22 @@ class CoulombLossFunction(AbstractLossFunction):
 
     def calculate_loss(self, predicted, target):
         centroids = self.centroids.detach().clone().to(self.device)
-        sum = torch.zeros(1)
+        sum = torch.zeros(1).to(self.device)
         for c in range(1, self.class_number):
             idx = (target == c).nonzero(as_tuple=False)
             if idx.shape[0] > 0:
                 examples = predicted[idx]
-                p = self.plummer_kernel(centroids[c].unsqueeze(0), examples, 3, 0.00000001)
-                p2 = self.plummer_kernel(torch.tensor([0, 0, 0]).unsqueeze(0), examples, 3, 0.00000001)
+                p = self.plummer_kernel(centroids[c].unsqueeze(0), examples, 3, self.epsilon)
+                p2 = self.plummer_kernel(torch.tensor([0, 0, 0]).unsqueeze(0).to(self.device), examples, 3, self.epsilon)
                 for c2 in range(0, self.class_number):
                     if c2!=c:
-                        p1 = self.plummer_kernel(examples, centroids[c2].unsqueeze(0), 3, 0.00000001)
-                        sum -= p1.sum(0)/idx.shape[0]
+                        p1 = self.plummer_kernel(examples, centroids[c2].unsqueeze(0), 3, self.epsilon)
+                        sum += p1.sum(0)/(9*idx.shape[0])
 
-                sum+=p.sum(1)/idx.shape[0]
-                sum+=p2.sum(1)/(20*idx.shape[0])
-        return sum + 1000
+                sum -= p.sum(1)/idx.shape[0]
+                sum -= p2.sum(1)/(100000*idx.shape[0])
+        print(sum)
+        return torch.exp(sum)
 
 
     def log_loss_details(self, predicted, target):

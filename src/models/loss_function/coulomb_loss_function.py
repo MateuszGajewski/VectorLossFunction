@@ -97,14 +97,14 @@ class CoulombLossFunction(AbstractLossFunction):
     def calculate_loss(self, predicted, target):
         centroids = self.centroids.detach().clone().to(self.device)
         sum = torch.zeros(1).to(self.device)
-        for c in range(1, self.class_number):
+        for c in range(0, self.class_number):
             idx = (target == c).nonzero(as_tuple=False)
             if idx.shape[0] > 0:
                 examples = predicted[idx]
                 p = self.plummer_kernel(centroids[c].unsqueeze(0), examples, 3, self.epsilon)
                 p2 = self.plummer_kernel(torch.tensor([0, 0, 0]).unsqueeze(0).to(self.device), examples, 3, self.epsilon)
                 for c2 in range(0, self.class_number):
-                    if c2!=c:
+                    if c2 != c:
                         p1 = self.plummer_kernel(examples, centroids[c2].unsqueeze(0), 3, self.epsilon)
                         sum += p1.sum(0)/(9*idx.shape[0])
 

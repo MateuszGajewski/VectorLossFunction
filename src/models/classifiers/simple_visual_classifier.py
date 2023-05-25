@@ -38,6 +38,7 @@ class SimpleVisualClassifier(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
+        x = F.tanh(x)
         if self.softmax_layer:
             x = F.log_softmax(x, dim=1)
         return x
@@ -86,7 +87,6 @@ class SimpleVisualClassifier(nn.Module):
         if test_loader is not None:
             for i in metrics.keys():
                 mlflow.log_metric("max_value_"+ i, self.max_metrics[i])
-
 
     def validate(self, config, test_loader, metrics, vector_to_label_transformer=None, step=None):
 

@@ -104,14 +104,13 @@ class CoulombLossFunction(AbstractLossFunction):
                 p = self.plummer_kernel(centroids[c].unsqueeze(0), examples, 3, self.epsilon)
                 p2 = self.plummer_kernel(torch.tensor([0, 0, 0]).unsqueeze(0).to(self.device), examples, 3, self.epsilon)
                 for c2 in range(0, self.class_number):
-                    if c2 != c:
+                    if c2!=c:
                         p1 = self.plummer_kernel(examples, centroids[c2].unsqueeze(0), 3, self.epsilon)
                         sum += p1.sum(0)/(9*idx.shape[0])
 
                 sum -= p.sum(1)/idx.shape[0]
-                sum -= p2.sum(1)/(100000*idx.shape[0])
-        print(sum)
-        return torch.exp(sum)
+                #sum -= p2.sum(1)/(100*idx.shape[0])
+        return sum+100
 
 
     def log_loss_details(self, predicted, target):

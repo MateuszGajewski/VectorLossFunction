@@ -15,12 +15,8 @@ class WineQualityDataLoader:
 
     def get_data_loaders(self, config):
         dataset_class = eval(config["data"]["dataset"])
-        dataset_train = dataset_class(
-            Path(config["data"]["train_data"])
-        )
-        dataset_test = dataset_class(
-            Path(config["data"]["test_data"])
-        )
+        dataset_train = dataset_class(Path(config["data"]["train_data"]))
+        dataset_test = dataset_class(Path(config["data"]["test_data"]))
 
         train_loader = DataLoader(
             dataset_train,

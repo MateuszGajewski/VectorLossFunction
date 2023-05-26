@@ -1,3 +1,5 @@
+from .coulomb_loss_function import CoulombLossFunction
+
 from .db_loss_function_approx import DBLossFunctionApprox
 from .db_loss_function_approx_cosine import DBLossFunctionApproxCosine
 from .db_loss_function_approx_freeze_centroids import \
@@ -14,6 +16,7 @@ from .db_loss_function_modified_approx_median import \
     DBLossFunctionModifiedApproxMedian
 from .db_loss_function_naive import DBLossFunctionNaive
 from .euclidean_loss_function import EuclideanLossFunction
+
 from .scalar_loss_function import ScalarLossFunction
 from .scalar_loss_function_centroids import ScalarLossFunctionCentroids
 from .db_loss_function_modified_approx_freeze_centroids import DBLossFunctionModifiedApproxFreezeCentroids

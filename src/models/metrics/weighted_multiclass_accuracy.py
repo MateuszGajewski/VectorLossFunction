@@ -18,7 +18,6 @@ class WeightedMultiClassAccuracy(AbstractMetric):
                             matrix[i][j] = self.group_confusion_weight
         return matrix.to(self.device)
 
-
     def calculate(self, predicted, target):
         indexes = torch.stack((target, predicted), 1)
         sum_ = torch.sum(self.weight_matrix[indexes[:, 0], indexes[:, 1]])

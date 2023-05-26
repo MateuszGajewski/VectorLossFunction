@@ -24,10 +24,12 @@ class VisualDataLoader:
         dataset_train = dataset_class(
             Path(config["data"]["train_data"]),
             transform=transform,
+            label_to_vec_function=self.simple_f,
         )
         dataset_test = dataset_class(
             Path(config["data"]["test_data"]),
             transform=transform,
+            label_to_vec_function=self.simple_f,
         )
 
         train_loader = DataLoader(
@@ -42,14 +44,8 @@ class VisualDataLoader:
             shuffle=True,
             pin_memory=True,
         )
-        if config.has_option('training', 'softmax_layer') \
-                and config['training']['softmax_layer'] == 'True':
-            cls = eval(config["training"]["classifier"])(
-                int(config["training"]["out_dim"]), True
-            ).to(config["training"]["device"])
-        else:
-            cls = eval(config["training"]["classifier"])(
-                int(config["training"]["out_dim"])
-            ).to(config["training"]["device"])
+        cls = eval(config["training"]["classifier"])(
+            int(config["training"]["out_dim"])
+        ).to(config["training"]["device"])
 
         return train_loader, test_loader, cls

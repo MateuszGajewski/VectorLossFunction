@@ -28,7 +28,7 @@ class TextDataLoader:
             processed_text = torch.tensor(text_pipeline(_text), dtype=torch.int64)
             text_list.append(processed_text)
             offsets.append(processed_text.size(0))
-        label_list = torch.tensor(label_list)
+        label_list = torch.stack(label_list)
         offsets = torch.tensor(offsets[:-1]).cumsum(dim=0)
         text_list = torch.cat(text_list)
         return (
@@ -41,10 +41,10 @@ class TextDataLoader:
         self.device = config["training"]["device"]
         dataset_class = eval(config["data"]["dataset"])
         dataset_train = dataset_class(
-            Path(config["data"]["train_data"])
+            Path(config["data"]["train_data"]), label_to_vec_function=self.simple_f
         )
         dataset_test = dataset_class(
-            Path(config["data"]["test_data"])
+            Path(config["data"]["test_data"]), label_to_vec_function=self.simple_f
         )
         self.tokenizer = get_tokenizer("basic_english")
 

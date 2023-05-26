@@ -2,7 +2,7 @@ from abc import abstractmethod
 
 
 class AbstractMetric:
-    def __init__(self, json, device='cpu'):
+    def __init__(self, json, device="cpu"):
         self.class_number = self.get_class_number(json)
         self.device = device
 

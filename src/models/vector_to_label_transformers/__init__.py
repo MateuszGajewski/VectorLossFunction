@@ -1,3 +1,4 @@
-from .nearest_centroid_vector_to_label_transformer import NearestCentroidVectorToLabelTransformer
-from .svc_to_label_transformer import SVCToLabelTransformer
+from .nearest_centroid_vector_to_label_transformer import \
+    NearestCentroidVectorToLabelTransformer
 from .scalar_to_label_transformer import ScalarToLabelTransformer
+from .svc_to_label_transformer import SVCToLabelTransformer

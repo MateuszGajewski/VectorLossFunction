@@ -1,6 +1,7 @@
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
+
 
 class ScalarToLabelTransformer:
     def __init__(self):
@@ -12,8 +13,9 @@ class ScalarToLabelTransformer:
         sample_size = int(np.ceil(dataset_size * 0.8))
         indx = np.random.randint(len(criterion.data_loader), size=sample_size)
         subset = torch.utils.data.Subset(criterion.data_loader.dataset, indx)
-        testloader_subset = torch.utils.data.DataLoader(subset, batch_size=sample_size - 1, num_workers=0,
-                                                        shuffle=False)
+        testloader_subset = torch.utils.data.DataLoader(
+            subset, batch_size=sample_size - 1, num_workers=0, shuffle=False
+        )
         sums = None
         with torch.no_grad():
             for i, data in enumerate(testloader_subset, 0):
@@ -27,14 +29,17 @@ class ScalarToLabelTransformer:
 
                 sums.index_add_(0, labels, outputs.float())
                 count = torch.bincount(labels).to(criterion.device)
-                count = torch.nn.functional.pad(count, pad=(0, criterion.class_number -
-                                                            count.shape[0]))
+                count = torch.nn.functional.pad(
+                    count, pad=(0, criterion.class_number - count.shape[0])
+                )
                 counts[:, 0] += count
-        self.avg = sums/counts
+        self.avg = sums / counts
 
     def predict(self, input_batch):
-        dot_products = torch.mm(torch.nn.functional.normalize(input_batch),
-                                torch.nn.functional.normalize(self.avg).T)
+        dot_products = torch.mm(
+            torch.nn.functional.normalize(input_batch),
+            torch.nn.functional.normalize(self.avg).T,
+        )
 
-        labels = torch.argmax(dot_products, dim =1)
+        labels = torch.argmax(dot_products, dim=1)
         return labels

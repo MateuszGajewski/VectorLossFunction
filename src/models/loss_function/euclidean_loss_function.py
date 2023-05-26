@@ -1,9 +1,10 @@
 import torch
+
 from .abstract_loss_function import AbstractLossFunction
 
 
 class EuclideanLossFunction(AbstractLossFunction):
-    def __init__(self, device='cpu', json=None) -> None:
+    def __init__(self, device="cpu", json=None) -> None:
         super(EuclideanLossFunction, self).__init__()
         self.class_number = self.get_class_number(json)
 

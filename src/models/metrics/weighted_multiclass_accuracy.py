@@ -1,9 +1,10 @@
-from .abstract_metric import AbstractMetric
 import torch
+
+from .abstract_metric import AbstractMetric
 
 
 class WeightedMultiClassAccuracy(AbstractMetric):
-    def __init__(self, json, device='cpu'):
+    def __init__(self, json, device="cpu"):
         super(WeightedMultiClassAccuracy, self).__init__(json, device)
         self.group_confusion_weight = 0.5
         self.weight_matrix = self.build_class_weight_matrix(json)
@@ -17,7 +18,6 @@ class WeightedMultiClassAccuracy(AbstractMetric):
                         if i != j:
                             matrix[i][j] = self.group_confusion_weight
         return matrix.to(self.device)
-
 
     def calculate(self, predicted, target):
         indexes = torch.stack((target, predicted), 1)

@@ -20,20 +20,28 @@ class SimpleTextClassifier(nn.Module):
         self.embedding.weight.data.uniform_(-initrange, initrange)
         self.fc.weight.data.uniform_(-initrange, initrange)
         self.fc.bias.data.zero_()
-        #nn.init.xavier_uniform_(self.fc.weight)
+        # nn.init.xavier_uniform_(self.fc.weight)
 
     def forward(self, text, offsets):
         embedded = self.embedding(text, offsets)
         f = self.fc(embedded)
         return f
 
-    def fit(self, config, optimizer, criterion, train_loader, vector_to_label_transformer=None,
-            test_loader=None, metrics=None):
+    def fit(
+        self,
+        config,
+        optimizer,
+        criterion,
+        train_loader,
+        vector_to_label_transformer=None,
+        test_loader=None,
+        metrics=None,
+    ):
         if metrics is not None:
             self.init_max_metrics(metrics)
         since = time.time()
         for epoch in range(
-                int(config["training"]["epochs"])
+            int(config["training"]["epochs"])
         ):  # loop over the dataset multiple times
             running_loss = 0.0
             epoch_loss = 0.0
@@ -57,12 +65,13 @@ class SimpleTextClassifier(nn.Module):
                 if i % 10 == 1:
                     print(f"[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.5f}")
                     running_loss = 0.0
-            mlflow.log_metric('loss', epoch_loss, epoch)
+            mlflow.log_metric("loss", epoch_loss, epoch)
             if test_loader is not None:
                 if vector_to_label_transformer:
                     vector_to_label_transformer.fit(criterion)
-                self.validate(config, test_loader, metrics,
-                              vector_to_label_transformer, epoch)
+                self.validate(
+                    config, test_loader, metrics, vector_to_label_transformer, epoch
+                )
 
         if vector_to_label_transformer:
             vector_to_label_transformer.fit(criterion)
@@ -72,8 +81,7 @@ class SimpleTextClassifier(nn.Module):
         mlflow.log_metric("Training time", time_elapsed)
         if test_loader is not None:
             for i in metrics.keys():
-                mlflow.log_metric("max_value_"+ i, self.max_metrics[i])
-
+                mlflow.log_metric("max_value_" + i, self.max_metrics[i])
 
     def validate(self, config, test_loader, metrics, vector_to_label_transformer=None):
         total_loss = 0.0

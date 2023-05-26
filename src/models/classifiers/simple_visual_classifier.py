@@ -42,13 +42,21 @@ class SimpleVisualClassifier(nn.Module):
             x = F.log_softmax(x, dim=1)
         return x
 
-    def fit(self, config, optimizer, criterion, train_loader, vector_to_label_transformer=None,
-            test_loader=None, metrics=None):
+    def fit(
+        self,
+        config,
+        optimizer,
+        criterion,
+        train_loader,
+        vector_to_label_transformer=None,
+        test_loader=None,
+        metrics=None,
+    ):
         if metrics is not None:
             self.init_max_metrics(metrics)
         since = time.time()
         for epoch in range(
-                int(config["training"]["epochs"])
+            int(config["training"]["epochs"])
         ):  # loop over the dataset multiple times
             running_loss = 0.0
             epoch_loss = 0.0
@@ -70,12 +78,13 @@ class SimpleVisualClassifier(nn.Module):
                 if i % 10 == 1:
                     print(f"[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.5f}")
                     running_loss = 0.0
-            mlflow.log_metric('loss', epoch_loss, epoch)
+            mlflow.log_metric("loss", epoch_loss, epoch)
             if test_loader is not None:
                 if vector_to_label_transformer:
                     vector_to_label_transformer.fit(criterion)
-                self.validate(config, test_loader, metrics,
-                              vector_to_label_transformer, epoch)
+                self.validate(
+                    config, test_loader, metrics, vector_to_label_transformer, epoch
+                )
 
         if vector_to_label_transformer:
             vector_to_label_transformer.fit(criterion)
@@ -85,11 +94,11 @@ class SimpleVisualClassifier(nn.Module):
         mlflow.log_metric("Training time", time_elapsed)
         if test_loader is not None:
             for i in metrics.keys():
-                mlflow.log_metric("max_value_"+ i, self.max_metrics[i])
+                mlflow.log_metric("max_value_" + i, self.max_metrics[i])
 
-
-    def validate(self, config, test_loader, metrics, vector_to_label_transformer=None, step=None):
-
+    def validate(
+        self, config, test_loader, metrics, vector_to_label_transformer=None, step=None
+    ):
         total_loss = 0.0
         total_number = 0
         losses = {}

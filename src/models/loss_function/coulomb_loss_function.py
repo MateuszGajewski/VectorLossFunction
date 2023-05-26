@@ -1,12 +1,14 @@
-import torch
-from .abstract_loss_function import AbstractLossFunction
 from abc import abstractmethod
+
 import mlflow
 import numpy as np
+import torch
+
+from .abstract_loss_function import AbstractLossFunction
+
 
 class CoulombLossFunction(AbstractLossFunction):
-
-    def __init__(self, device='cpu', json=None):
+    def __init__(self, device="cpu", json=None):
         super(CoulombLossFunction, self).__init__()
         self.device = device
         self.data_loader = None
@@ -42,7 +44,9 @@ class CoulombLossFunction(AbstractLossFunction):
     def init_tensors(self, predicted, target):
         out_dimension = predicted.shape[1]
         self.sum = torch.zeros(self.class_number, out_dimension).to(self.device)
-        self.count = torch.ones(self.class_number, 1).to(self.device)  # for numeric stability?
+        self.count = torch.ones(self.class_number, 1).to(
+            self.device
+        )  # for numeric stability?
         self.centroids = torch.zeros(self.class_number, 1).to(self.device)
         self.distances = torch.zeros(self.class_number, 1).to(self.device)
 
@@ -58,7 +62,9 @@ class CoulombLossFunction(AbstractLossFunction):
     def update_centroids(self, predicted, target):
         self.sum.index_add_(0, target, predicted.float())
         count = torch.bincount(target).to(self.device)
-        count = torch.nn.functional.pad(count, pad=(0, self.class_number - count.shape[0]))
+        count = torch.nn.functional.pad(
+            count, pad=(0, self.class_number - count.shape[0])
+        )
         self.count[:, 0] += count
 
     def update_distances(self, predicted, target):
@@ -78,8 +84,8 @@ class CoulombLossFunction(AbstractLossFunction):
         return class_number
 
     def calculate_squared_distances(self, a, b):
-        '''returns the squared distances between all elements in a and in b as a matrix
-        of shape #a * #b'''
+        """returns the squared distances between all elements in a and in b as a matrix
+        of shape #a * #b"""
         na = a.data.shape[0]
         nb = b.data.shape[0]
         dim = a.data.shape[-1]
@@ -101,25 +107,35 @@ class CoulombLossFunction(AbstractLossFunction):
             idx = (target == c).nonzero(as_tuple=False)
             if idx.shape[0] > 0:
                 examples = predicted[idx]
-                p = self.plummer_kernel(centroids[c].unsqueeze(0), examples, 3, self.epsilon)
-                p2 = self.plummer_kernel(torch.tensor([0, 0, 0]).unsqueeze(0).to(self.device), examples, 3, self.epsilon)
+                p = self.plummer_kernel(
+                    centroids[c].unsqueeze(0), examples, 3, self.epsilon
+                )
+                p2 = self.plummer_kernel(
+                    torch.tensor([0, 0, 0]).unsqueeze(0).to(self.device),
+                    examples,
+                    3,
+                    self.epsilon,
+                )
                 for c2 in range(0, self.class_number):
                     if c2 != c:
-                        p1 = self.plummer_kernel(examples, centroids[c2].unsqueeze(0), 3, self.epsilon)
-                        sum += p1.sum(0)/(9*idx.shape[0])
+                        p1 = self.plummer_kernel(
+                            examples, centroids[c2].unsqueeze(0), 3, self.epsilon
+                        )
+                        sum += p1.sum(0) / (9 * idx.shape[0])
 
-                sum -= p.sum(1)/idx.shape[0]
-                sum -= p2.sum(1)/(100000*idx.shape[0])
+                sum -= p.sum(1) / idx.shape[0]
+                sum -= p2.sum(1) / (100000 * idx.shape[0])
         print(sum)
         return torch.exp(sum)
-
 
     def log_loss_details(self, predicted, target):
         centroids = self.centroids.detach().clone().to(self.device)
         s = self.calculate_distances_update(predicted, target, centroids)
-        m = torch.cdist(centroids, centroids, p=2).to(self.device)  # class centrioids separation
-        mlflow.log_metric('loss_function-points_distances', torch.sum(s))
-        mlflow.log_metric('loss_function-centroids_distances', torch.sum(m))
+        m = torch.cdist(centroids, centroids, p=2).to(
+            self.device
+        )  # class centrioids separation
+        mlflow.log_metric("loss_function-points_distances", torch.sum(s))
+        mlflow.log_metric("loss_function-centroids_distances", torch.sum(m))
 
     def forward(self, predicted, target, epoch=0):
         self.epoch_count += 1
@@ -131,7 +147,7 @@ class CoulombLossFunction(AbstractLossFunction):
         loss = self.calculate_loss(predicted, target)
         if self.log_loss:
             ...
-            #self.log_loss_details(predicted, target)
+            # self.log_loss_details(predicted, target)
 
         return loss
 
@@ -140,9 +156,13 @@ class CoulombLossFunction(AbstractLossFunction):
         sample_size = int(np.ceil(dataset_size * self.approx_size))
         indx = np.random.randint(len(self.data_loader), size=sample_size)
         subset = torch.utils.data.Subset(self.data_loader.dataset, indx)
-        testloader_subset = torch.utils.data.DataLoader(subset, batch_size=sample_size-1,
-                                                        num_workers=0, shuffle=True,
-                                                        collate_fn = self.data_loader.collate_fn)
+        testloader_subset = torch.utils.data.DataLoader(
+            subset,
+            batch_size=sample_size - 1,
+            num_workers=0,
+            shuffle=True,
+            collate_fn=self.data_loader.collate_fn,
+        )
         with torch.no_grad():
             for i, data in enumerate(testloader_subset, 0):
                 if len(data) == 2:
@@ -165,9 +185,13 @@ class CoulombLossFunction(AbstractLossFunction):
         sample_size = int(np.ceil(dataset_size * self.approx_size))
         indx = np.random.randint(len(self.data_loader), size=sample_size)
         subset = torch.utils.data.Subset(self.data_loader.dataset, indx)
-        testloader_subset = torch.utils.data.DataLoader(subset, batch_size=sample_size-1,
-                                                        num_workers=0, shuffle=False,
-                                                        collate_fn=self.data_loader.collate_fn)
+        testloader_subset = torch.utils.data.DataLoader(
+            subset,
+            batch_size=sample_size - 1,
+            num_workers=0,
+            shuffle=False,
+            collate_fn=self.data_loader.collate_fn,
+        )
         with torch.no_grad():
             for i, data in enumerate(testloader_subset, 0):
                 if len(data) == 2:

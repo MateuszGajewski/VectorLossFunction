@@ -1,12 +1,13 @@
-import torch
-from .abstract_loss_function import AbstractLossFunction
 from abc import abstractmethod
+
 import mlflow
+import torch
+
+from .abstract_loss_function import AbstractLossFunction
 
 
 class DBLossFunctionAbstract(AbstractLossFunction):
-
-    def __init__(self, device='cpu', json=None):
+    def __init__(self, device="cpu", json=None):
         super(DBLossFunctionAbstract, self).__init__()
         self.device = device
         self.data_loader = None
@@ -29,10 +30,10 @@ class DBLossFunctionAbstract(AbstractLossFunction):
 
     def assign_model(self, model):
         self.model = model
-        
+
     def assign_data_loader(self, data_loader):
         self.data_loader = data_loader
-        
+
     def get_centroids(self):
         self.calculate_centroids()
         return self.centroids
@@ -40,7 +41,9 @@ class DBLossFunctionAbstract(AbstractLossFunction):
     def init_tensors(self, predicted, target):
         out_dimension = predicted.shape[1]
         self.sum = torch.zeros(self.class_number, out_dimension).to(self.device)
-        self.count = torch.ones(self.class_number, 1).to(self.device) #for numeric stability?
+        self.count = torch.ones(self.class_number, 1).to(
+            self.device
+        )  # for numeric stability?
         self.centroids = torch.zeros(self.class_number, 1).to(self.device)
         self.distances = torch.zeros(self.class_number, 1).to(self.device)
 
@@ -56,7 +59,9 @@ class DBLossFunctionAbstract(AbstractLossFunction):
     def update_centroids(self, predicted, target):
         self.sum.index_add_(0, target, predicted.float())
         count = torch.bincount(target).to(self.device)
-        count = torch.nn.functional.pad(count, pad=(0, self.class_number - count.shape[0]))
+        count = torch.nn.functional.pad(
+            count, pad=(0, self.class_number - count.shape[0])
+        )
         self.count[:, 0] += count
 
     def update_distances(self, predicted, target):
@@ -79,7 +84,9 @@ class DBLossFunctionAbstract(AbstractLossFunction):
         s = self.distances.detach().clone().to(self.device)  # coherence in class
         selected_counts = torch.index_select(self.count, 0, target)
         selected_centroids = torch.index_select(centroids, 0, target)
-        centroids.index_add_(0, target, (predicted - selected_centroids) / selected_counts)
+        centroids.index_add_(
+            0, target, (predicted - selected_centroids) / selected_counts
+        )
         pr = predicted / selected_counts
         vec = torch.linalg.vector_norm(selected_centroids - pr, dim=1)
         s.index_add_(0, target, vec.reshape(target.shape[0], 1))
@@ -91,30 +98,34 @@ class DBLossFunctionAbstract(AbstractLossFunction):
     def calculate_centroids_update(self, predicted, target, centroids):
         selected_counts = torch.index_select(self.count, 0, target)
         selected_centroids = torch.index_select(centroids, 0, target)
-        centroids.index_add_(0, target, predicted/ selected_counts)
-        #vec = torch.linalg.vector_norm(centroids, dim=1)
-        #sum_ = torch.sum(vec)
+        centroids.index_add_(0, target, predicted / selected_counts)
+        # vec = torch.linalg.vector_norm(centroids, dim=1)
+        # sum_ = torch.sum(vec)
         return centroids
 
     def calculate_loss(self, predicted, target):
         centroids = self.centroids.detach().clone().to(self.device)
         centroids = self.calculate_centroids_update(predicted, target, centroids)
         s = self.calculate_distances_update(predicted, target, centroids)
-        m = torch.cdist(centroids, centroids, p=2).to(self.device)  # class centrioids separation
+        m = torch.cdist(centroids, centroids, p=2).to(
+            self.device
+        )  # class centrioids separation
         sum_ = torch.zeros(1).to(self.device)
         for i in range(0, self.class_number):
             for j in range(0, self.class_number):
                 if i != j:
-                    sum_ += self.class_weights_matrix[i][j] * (s[i] + s[j])/(m[i][j])
-        loss = sum_ / self.class_number ** 2
+                    sum_ += self.class_weights_matrix[i][j] * (s[i] + s[j]) / (m[i][j])
+        loss = sum_ / self.class_number**2
         return loss
 
     def log_loss_details(self, predicted, target):
         centroids = self.centroids.detach().clone().to(self.device)
         s = self.calculate_distances_update(predicted, target, centroids)
-        m = torch.cdist(centroids, centroids, p=2).to(self.device)  # class centrioids separation
-        mlflow.log_metric('loss_function-points_distances', torch.sum(s))
-        mlflow.log_metric('loss_function-centroids_distances', torch.sum(m))
+        m = torch.cdist(centroids, centroids, p=2).to(
+            self.device
+        )  # class centrioids separation
+        mlflow.log_metric("loss_function-points_distances", torch.sum(s))
+        mlflow.log_metric("loss_function-centroids_distances", torch.sum(m))
 
     def forward(self, predicted, target, epoch=0):
         self.epoch_count += 1

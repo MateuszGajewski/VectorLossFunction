@@ -1,5 +1,6 @@
-from .db_loss_function_abstract import DBLossFunctionAbstract
 import torch
+
+from .db_loss_function_abstract import DBLossFunctionAbstract
 
 
 class DBLossFunctionNaive(DBLossFunctionAbstract):

@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
+
 import torch.nn as nn
 
 
 class AbstractLossFunction(nn.Module):
     @abstractmethod
-    def __init__(self, device='cpu', json=None):
+    def __init__(self, device="cpu", json=None):
         super(AbstractLossFunction, self).__init__()
 
     @abstractmethod

@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader, Dataset, random_split
 
 class NewsCategoryDataset(Dataset):
     def __init__(self, data_path, transform=None):
-        self.data = pd.read_csv(data_path)[0:2000]
+        self.data = pd.read_csv(data_path)[0:10000]
         self.transform = transform
 
     def __len__(self):

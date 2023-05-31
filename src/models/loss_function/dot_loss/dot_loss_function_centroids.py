@@ -4,12 +4,12 @@ import mlflow
 import numpy as np
 import torch
 
-from .abstract_loss_function import AbstractLossFunction
+from src.models.loss_function.abstract_loss_function import AbstractLossFunction
 
 
-class ScalarLossFunctionCentroids(AbstractLossFunction):
+class DotLossFunctionCentroids(AbstractLossFunction):
     def __init__(self, device="cpu", json=None):
-        super(ScalarLossFunctionCentroids, self).__init__()
+        super(DotLossFunctionCentroids, self).__init__()
         self.device = device
         self.data_loader = None
         self.model = None

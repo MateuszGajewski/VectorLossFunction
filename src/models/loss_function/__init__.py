@@ -1,25 +1,4 @@
-from .coulomb_loss_function import CoulombLossFunction
-
-from .db_loss_function_approx import DBLossFunctionApprox
-from .db_loss_function_approx_cosine import DBLossFunctionApproxCosine
-from .db_loss_function_approx_freeze_centroids import \
-    DBLossFunctionApproxFreezeCentroids
-from .db_loss_function_approx_median import DBLossFunctionApproxMedian
-from .db_loss_function_approx_regularization import \
-    DBLossFunctionApproxRegularization
-from .db_loss_function_modified_approx import DBLossFunctionModifiedApprox
-from .db_loss_function_modified_approx import DBLossFunctionModifiedApprox
- scalar_multipication_loss_dunction
-from .db_loss_function_modified_approx_freeze_centroids import \
-    DBLossFunctionModifiedApproxFreezeCentroids
-from .db_loss_function_modified_approx_median import \
-    DBLossFunctionModifiedApproxMedian
-from .db_loss_function_naive import DBLossFunctionNaive
+from .coulomb_loss import CoulombLossFunction
+from .dot_loss import DotLossFunction, DotLossFunctionCentroids
+from .db_loss import DBLossFunctionApprox,DBLossFunctionApproxMedian, DBLossFunctionNaive
 from .euclidean_loss_function import EuclideanLossFunction
-
-from .scalar_loss_function import ScalarLossFunction
-from .scalar_loss_function_centroids import ScalarLossFunctionCentroids
-from .db_loss_function_modified_approx_freeze_centroids import DBLossFunctionModifiedApproxFreezeCentroids
-from .db_loss_function_modified_approx_median import DBLossFunctionModifiedApproxMedian
-from .db_loss_function_approx_cosine import DBLossFunctionApproxCosine
-from .coulomb_loss_function import CoulombLossFunction

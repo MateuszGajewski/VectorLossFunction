@@ -4,7 +4,7 @@ import mlflow
 import numpy as np
 import torch
 
-from .abstract_loss_function import AbstractLossFunction
+from src.models.loss_function.abstract_loss_function import AbstractLossFunction
 
 
 class CoulombLossFunction(AbstractLossFunction):

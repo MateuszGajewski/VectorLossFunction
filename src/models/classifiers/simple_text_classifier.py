@@ -3,29 +3,35 @@ import time
 import mlflow
 import torch
 from torch import nn
+import torch.nn.functional as F
 
 
 class SimpleTextClassifier(nn.Module):
     def __str__(self):
         return "Simple_Text_Cassifier"
 
-    def __init__(self, vocab_size, embed_dim, num_class):
+    def __init__(self, vocab_size, num_class, softmax_layer=False):
         super(SimpleTextClassifier, self).__init__()
-        self.embedding = nn.EmbeddingBag(vocab_size, embed_dim, sparse=False)
-        self.fc = nn.Linear(embed_dim, num_class)
-        self.init_weights()
-
+        self.softmax_layer = softmax_layer
+        self.model = nn.Sequential(
+            nn.Linear(vocab_size, 128),
+            nn.Linear(128, 64),
+            nn.Linear(64, 128),
+            nn.Linear(128, 64),
+            nn.Linear(64, num_class),
+        )
     def init_weights(self):
         initrange = 0.5
-        self.embedding.weight.data.uniform_(-initrange, initrange)
-        self.fc.weight.data.uniform_(-initrange, initrange)
-        self.fc.bias.data.zero_()
+        #self.embedding.weight.data.uniform_(-initrange, initrange)
+        #self.model.weight.data.uniform_(-initrange, initrange)
+        #self.model.bias.data.zero_()
         # nn.init.xavier_uniform_(self.fc.weight)
 
-    def forward(self, text, offsets):
-        embedded = self.embedding(text, offsets)
-        f = self.fc(embedded)
-        return f
+    def forward(self, x):
+        x = self.model(x)
+        if self.softmax_layer:
+            x = F.log_softmax(x, dim=1)
+        return x
 
     def fit(
         self,
@@ -47,16 +53,15 @@ class SimpleTextClassifier(nn.Module):
             epoch_loss = 0.0
             for i, data in enumerate(train_loader, 0):
                 # get the inputs; data is a list of [inputs, labels]
-                labels, inputs, offsets = data
+                inputs, labels = data
                 inputs = inputs.to(config["training"]["device"])
                 labels = labels.to(config["training"]["device"])
-                offsets = offsets.to(config["training"]["device"])
                 # zero the parameter gradients
                 optimizer.zero_grad()
                 # forward + backward + optimize
-                outputs = self.forward(inputs, offsets)
+                outputs = self.forward(inputs)
                 outputs = outputs.to(config["training"]["device"])
-                loss = criterion(outputs, labels, epoch)
+                loss = criterion(outputs, labels)
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(self.parameters(), 0.1)
                 optimizer.step()
@@ -92,16 +97,15 @@ class SimpleTextClassifier(nn.Module):
         print(losses)
         with torch.no_grad():
             for i, data in enumerate(test_loader, 0):
-                label, text, offsets = data
+                inputs, label = data
                 # get the inputs; data is a list of [inputs, labels]
-                text = text.to(config["training"]["device"])
+                inputs = inputs.to(config["training"]["device"])
                 labels = label.to(config["training"]["device"])
-                offsets = offsets.to(config["training"]["device"])
-                outputs = self.forward(text, offsets)
+                outputs = self.forward(inputs)
                 outputs = outputs.to(config["training"]["device"])
                 if vector_to_label_transformer:
                     outputs = vector_to_label_transformer.predict(outputs)
-                elif outputs.shape[1] == 10:
+                elif outputs.shape[1] == 31:
                     _, outputs = torch.max(outputs.data, 1)
                 for j in metrics.keys():
                     losses[j] += metrics[j].calculate(outputs, labels)

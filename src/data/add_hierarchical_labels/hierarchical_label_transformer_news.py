@@ -6,7 +6,7 @@ import pandas as pd
 
 from src.data.add_hierarchical_labels.hierarchical_label_transformer import \
     HierarchicalLabelTransformer
-
+from ..utils.text_preprocessor import TextPreprocessor
 
 class HierarchicalLabelTransformerNews(HierarchicalLabelTransformer):
     def __init__(self):
@@ -36,6 +36,7 @@ class HierarchicalLabelTransformerNews(HierarchicalLabelTransformer):
             "5": ["ENTERTAINMENT", "COMEDY", "WEIRD NEWS"],
             "6": ["FOOD & DRINK", "TASTE"],
         }
+        self.text_preprocessor = TextPreprocessor()
 
     def drop_rows_not_in_dict(self, df):
         all_categories = []
@@ -55,6 +56,7 @@ class HierarchicalLabelTransformerNews(HierarchicalLabelTransformer):
         df = df.fillna("")
         df["hierarchical_label"] = df.apply(lambda row: self.new_label(row), axis=1)
         df["label"] = pd.Categorical(df["category"]).codes
+        df = self.text_preprocessor.preprocess(df)
         msk = np.random.rand(len(df)) < 0.8
         train_df = df[msk]
         test_df = df[~msk]

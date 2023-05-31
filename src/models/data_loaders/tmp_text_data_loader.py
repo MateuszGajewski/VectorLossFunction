@@ -1,15 +1,9 @@
 from pathlib import Path
 
 import torch
-import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import build_vocab_from_iterator
-import pandas as pd
-import src.data.datasets as dataset
-import src.models.classifiers as classifiers
 from sklearn.feature_extraction.text import TfidfVectorizer
-import numpy as np
+
 
 class TextDataLoader:
     def __init__(self):
@@ -22,18 +16,20 @@ class TextDataLoader:
         return torch.tensor([l, lh])
 
     def collate_batch(self, batch):
-        label_list, text_list = [], []
+        text_pipeline = lambda x: self.vocab(self.tokenizer(x))
+        label_list, text_list, offsets = [], [], [0]
         for _text, _label in batch:
             label_list.append(_label)
-            tfidf = self.vectorizer.transform([_text])
-            processed_text = torch.tensor(tfidf.toarray(), dtype=torch.float32)
+            processed_text = torch.tensor(text_pipeline(_text), dtype=torch.int64)
             text_list.append(processed_text)
+            offsets.append(processed_text.size(0))
         label_list = torch.tensor(label_list)
+        offsets = torch.tensor(offsets[:-1]).cumsum(dim=0)
         text_list = torch.cat(text_list)
         return (
-            text_list.to(self.device),
             label_list.to(self.device),
-
+            text_list.to(self.device),
+            offsets.to(self.device),
         )
 
     def get_data_loaders(self, config):
@@ -41,8 +37,16 @@ class TextDataLoader:
         dataset_class = eval(config["data"]["dataset"])
         dataset_train = dataset_class(Path(config["data"]["train_data"]))
         dataset_test = dataset_class(Path(config["data"]["test_data"]))
-        self.vectorizer = TfidfVectorizer()
-        trainXV = self.vectorizer.fit_transform(dataset_train.data['clean_text'].values.astype('U'))
+
+
+        vectorizer = TfidfVectorizer()
+        # fit_transform for train data
+        trainXV = vectorizer.fit_transform(train['clean_text'])
+        trainY = train['category']
+        # transform for test data
+        testXV = vectorizer.transform(test['clean_text'])
+        testY = test['category']
+        print(trainXV.shape, testXV.shape)
 
         train_loader = DataLoader(
             dataset_train,
@@ -58,19 +62,10 @@ class TextDataLoader:
             pin_memory=True,
             collate_fn=self.collate_batch,
         )
-        print(len(self.vectorizer.get_feature_names_out()))
-        if (
-                config.has_option("training", "softmax_layer")
-                and config["training"]["softmax_layer"] == "True"
-        ):
-            cls = eval(config["training"]["classifier"])(
-                len(self.vectorizer.get_feature_names_out()),
-                int(config["training"]["out_dim"]), True
-            ).to(config["training"]["device"])
-        else:
-            cls = eval(config["training"]["classifier"])(
-                len(self.vectorizer.get_feature_names_out()),
-                int(config["training"]["out_dim"]),
-            ).to(config["training"]["device"])
+        cls = eval(config["training"]["classifier"])(
+            len(self.vocab),
+            int(config["data"]["embed_dim"]),
+            int(config["training"]["out_dim"]),
+        ).to(config["training"]["device"])
 
         return train_loader, test_loader, cls

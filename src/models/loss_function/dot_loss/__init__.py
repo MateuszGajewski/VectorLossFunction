@@ -1,0 +1,2 @@
+from .dot_loss_function import DotLossFunction
+from .dot_loss_function_centroids import DotLossFunctionCentroids

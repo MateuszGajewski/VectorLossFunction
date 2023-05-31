@@ -111,7 +111,7 @@ class CoulombLossFunction(AbstractLossFunction):
                     centroids[c].unsqueeze(0), examples, 3, self.epsilon
                 )
                 p2 = self.plummer_kernel(
-                    torch.tensor([0, 0, 0]).unsqueeze(0).to(self.device),
+                    torch.zeros((1, predicted.shape[1])).to(self.device),
                     examples,
                     3,
                     self.epsilon,

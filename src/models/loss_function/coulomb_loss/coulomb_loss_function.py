@@ -128,7 +128,7 @@ class CoulombLossFunction(AbstractLossFunction):
                 sum -= p.sum(1) / idx.shape[0]
                 sum -= p2.sum(1) / (100000 * idx.shape[0])
         #print(sum)
-        return torch.exp(sum)
+        return sum + 100
 
     def log_loss_details(self, predicted, target):
         centroids = self.centroids.detach().clone().to(self.device)

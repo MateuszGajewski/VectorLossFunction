@@ -5,11 +5,15 @@ from torch.utils.data import DataLoader, Dataset, random_split
 
 class NewsCategoryDataset(Dataset):
     def __init__(self, data_path, transform=None):
-        self.data = pd.read_csv(data_path)[0:20000]
+        self.data = pd.read_csv(data_path)[0:10000]
+        selected_cat = ['POLITICS',  'ENTERTAINMENT', 'U.S. NEWS', 'WORLD NEWS']
+        self.data = self.data[self.data['category'].isin(selected_cat)].reset_index(drop=True)
         print("len", len(self.data))
+        print(self.data['category'].value_counts())
+        print(self.data['label'].value_counts())
+        #self.data = pd.read_csv(data_path)[0:15000]
         #self.data = pd.read_csv(data_path)
-        selected_cat = ['POLITICS', 'WELNESS', 'ENTERTAINMENT', 'TRAVEL']
-        #self.data = self.data[self.data['category'].isin(selected_cat)].reset_index(drop=True)
+
 
         self.transform = transform
 

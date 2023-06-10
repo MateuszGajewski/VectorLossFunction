@@ -24,6 +24,7 @@ class CoulombLossFunction(AbstractLossFunction):
         self.log_loss = False
         self.approx_size = 0.1
         self.epsilon = 1
+        #self.class_number =4
 
     def set_recalculate_period(self, recalculate_period):
         self.recalculate_period = int(recalculate_period)
@@ -47,7 +48,7 @@ class CoulombLossFunction(AbstractLossFunction):
         self.count = torch.ones(self.class_number, 1).to(
             self.device
         )  # for numeric stability?
-        self.centroids = torch.zeros(self.class_number, 1).to(self.device)
+        self.centroids = 10*torch.rand(self.class_number, 1).to(self.device)
         self.distances = torch.zeros(self.class_number, 1).to(self.device)
 
     def build_class_weight_matrix(self, json):
@@ -75,6 +76,7 @@ class CoulombLossFunction(AbstractLossFunction):
 
     def calculate_centroids(self):
         self.centroids = self.sum / self.count
+        #print(self.centroids)
 
     @staticmethod
     def get_class_number(json):
@@ -125,7 +127,7 @@ class CoulombLossFunction(AbstractLossFunction):
 
                 sum -= p.sum(1) / idx.shape[0]
                 sum -= p2.sum(1) / (100000 * idx.shape[0])
-        print(sum)
+        #print(sum)
         return torch.exp(sum)
 
     def log_loss_details(self, predicted, target):

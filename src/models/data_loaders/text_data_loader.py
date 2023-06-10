@@ -48,14 +48,12 @@ class TextDataLoader:
             dataset_train,
             batch_size=int(config["training"]["batch_size"]),
             shuffle=True,
-            pin_memory=True,
             collate_fn=self.collate_batch,
         )
         test_loader = DataLoader(
             dataset_test,
             batch_size=int(config["training"]["batch_size"]),
             shuffle=True,
-            pin_memory=True,
             collate_fn=self.collate_batch,
         )
         print(len(self.vectorizer.get_feature_names_out()))

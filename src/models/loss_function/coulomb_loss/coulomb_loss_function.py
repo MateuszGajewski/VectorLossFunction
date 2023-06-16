@@ -123,7 +123,7 @@ class CoulombLossFunction(AbstractLossFunction):
                         p1 = self.plummer_kernel(
                             examples, centroids[c2].unsqueeze(0), 3, self.epsilon
                         )
-                        sum += p1.sum(0) / (9 * idx.shape[0])
+                        sum += p1.sum(0) / (10 * idx.shape[0])
 
                 sum -= p.sum(1) / idx.shape[0]
                 sum -= p2.sum(1) / (100000 * idx.shape[0])

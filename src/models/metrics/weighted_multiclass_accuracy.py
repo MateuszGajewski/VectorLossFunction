@@ -20,7 +20,7 @@ class WeightedMultiClassAccuracy(AbstractMetric):
         return matrix.to(self.device)
 
     def calculate(self, predicted, target):
-        indexes = torch.stack((target, predicted), 1)
+        indexes = torch.stack((target, predicted.to(self.device)), 1)
         sum_ = torch.sum(self.weight_matrix[indexes[:, 0], indexes[:, 1]])
 
         return sum_

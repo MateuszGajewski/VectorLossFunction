@@ -24,7 +24,7 @@ class CoulombLossFunction(AbstractLossFunction):
         self.log_loss = False
         self.approx_size = 0.1
         self.epsilon = 1
-        #self.class_number =4
+        #self.class_number = 4
 
     def set_recalculate_period(self, recalculate_period):
         self.recalculate_period = int(recalculate_period)
@@ -123,7 +123,7 @@ class CoulombLossFunction(AbstractLossFunction):
                         p1 = self.plummer_kernel(
                             examples, centroids[c2].unsqueeze(0), 3, self.epsilon
                         )
-                        sum += p1.sum(0) / (10 * idx.shape[0])
+                        sum += p1.sum(0) / (self.class_number * idx.shape[0])
 
                 sum -= p.sum(1) / idx.shape[0]
                 sum -= p2.sum(1) / (100000 * idx.shape[0])

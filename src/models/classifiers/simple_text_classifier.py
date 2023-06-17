@@ -78,7 +78,7 @@ class SimpleTextClassifier(nn.Module):
                 running_loss += loss.item()
                 epoch_loss += loss.item()
                 if i % 10 == 1:
-                    print(f"[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.5f}")
+                    print(f"[{epoch + 1}, {i + 1:8d}] loss: {running_loss / 2000:.8f}")
                     running_loss = 0.0
             mlflow.log_metric("loss", epoch_loss, epoch)
             if test_loader is not None:

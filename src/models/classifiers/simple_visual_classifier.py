@@ -39,6 +39,7 @@ class SimpleVisualClassifier(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         x = F.tanh(x)
+        #x = F.sigmoid(x)
         if self.softmax_layer:
             x = F.log_softmax(x, dim=1)
         return x

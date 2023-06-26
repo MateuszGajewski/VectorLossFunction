@@ -162,9 +162,9 @@ if __name__ == "__main__":
     # experiment = Experiment(Path("./configs/visual_config_softmax_cross_entropy.ini"))
     #experiment = Experiment(Path("./configs/visual_config_coulomb.ini"))
     # experiment = Experiment(Path("./configs/text_config_davies_bouldin.ini"))
-    experiment = Experiment(Path("./configs/text_config_davies_bouldin.ini"))
+    #experiment = Experiment(Path("./configs/text_config_davies_bouldin.ini"))
     #experiment = Experiment(Path("./configs/text_config_softmax_crossentropy.ini"))
-
+    experiment = Experiment(Path("./configs/visual_config_dot.ini"))
     experiment.build_objects()
     experiment.build_metrics()
     experiment.train_and_log_model()

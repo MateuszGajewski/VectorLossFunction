@@ -10,9 +10,10 @@ class SimpleTextClassifier(nn.Module):
     def __str__(self):
         return "Simple_Text_Cassifier"
 
-    def __init__(self, vocab_size, num_class, softmax_layer=False):
+    def __init__(self, vocab_size, num_class, softmax_layer=False, tanh_layer=False):
         super(SimpleTextClassifier, self).__init__()
         self.softmax_layer = softmax_layer
+        self.tanh_layer =  tanh_layer
         self.model = nn.Sequential(
             nn.Linear(vocab_size, 128),
             nn.Linear(128, 64),

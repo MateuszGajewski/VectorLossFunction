@@ -110,7 +110,7 @@ class DotLossFunction(AbstractLossFunction):
 
                 a = 1 + torch.mm(examples_normalized, examples_normalized.T)
                 a = a / 2
-                a = a - torch.eye(examples_normalized.shape[0])
+                a = a - torch.eye(examples_normalized.shape[0]).to(self.device)
                 a = a.sum()
                 a = a / (examples_normalized.shape[0] ** 2)
                 a = (idx.shape[0] / target.shape[0]) * a

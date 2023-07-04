@@ -8,7 +8,7 @@ class ScalarToLabelTransformer:
         self.avg = None
 
     def fit(self, criterion):
-        counts = torch.zeros(criterion.class_number, 1)
+        counts = torch.zeros(criterion.class_number, 1).to(criterion.device)
         dataset_size = len(criterion.data_loader.dataset)
         sample_size = int(np.ceil(dataset_size * 0.8))
         indx = np.random.randint(len(criterion.data_loader), size=sample_size)
@@ -25,13 +25,13 @@ class ScalarToLabelTransformer:
                 outputs = criterion.model.forward(inputs)
                 outputs.to(criterion.device)
                 if sums is None:
-                    sums = torch.zeros(criterion.class_number, outputs.shape[1])
+                    sums = torch.zeros(criterion.class_number, outputs.shape[1]).to(criterion.device)
 
                 sums.index_add_(0, labels, outputs.float())
                 count = torch.bincount(labels).to(criterion.device)
                 count = torch.nn.functional.pad(
                     count, pad=(0, criterion.class_number - count.shape[0])
-                )
+                ).to(criterion.device)
                 counts[:, 0] += count
         self.avg = sums / counts
 

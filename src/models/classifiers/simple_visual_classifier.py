@@ -16,10 +16,11 @@ class SimpleVisualClassifier(nn.Module):
         for i in metrics.keys():
             self.max_metrics[i] = 0
 
-    def __init__(self, out_dim=3, softmax_layer=False):
+    def __init__(self, out_dim=3, softmax_layer=False, tanh_layer=False):
         self.max_metrics = None
         super().__init__()
         self.softmax_layer = softmax_layer
+        self.tanh_layer =  tanh_layer
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
@@ -38,8 +39,11 @@ class SimpleVisualClassifier(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
-        x = F.tanh(x)
-        #x = F.sigmoid(x)
+        if self.tanh_layer:
+            x = F.tanh(x)
+            #x = F.sigmoid(x)
+            #print(x)
+        #print(x)
         if self.softmax_layer:
             x = F.log_softmax(x, dim=1)
         return x
@@ -121,7 +125,7 @@ class SimpleVisualClassifier(nn.Module):
                 elif outputs.shape[1] == 10:
                     _, outputs = torch.max(outputs.data, 1)
                 for j in metrics.keys():
-                    losses[j] += metrics[j].calculate(outputs, labels)
+                    losses[j] += metrics[j].calculate(outputs, labels).to(config["training"]["device"])
                 total_number += labels.size(0)
 
         for i in metrics.keys():

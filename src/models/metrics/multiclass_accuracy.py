@@ -11,4 +11,4 @@ class MultiClassAccuracy(AbstractMetric):
         ).to(self.device)
 
     def calculate(self, predicted, target):
-        return self.metric(predicted, target) * target.shape[0]
+        return self.metric(predicted.to(self.device), target.to(self.device)).to(self.device)* target.shape[0]

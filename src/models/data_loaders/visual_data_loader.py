@@ -49,6 +49,13 @@ class VisualDataLoader:
             cls = eval(config["training"]["classifier"])(
                 int(config["training"]["out_dim"]), True
             ).to(config["training"]["device"])
+        elif (
+            config.has_option("training", "tanh_layer")
+            and config["training"]["tanh_layer"] == "True"
+        ):
+            cls = eval(config["training"]["classifier"])(
+                int(config["training"]["out_dim"]), False, True
+            ).to(config["training"]["device"])
         else:
             cls = eval(config["training"]["classifier"])(
                 int(config["training"]["out_dim"])

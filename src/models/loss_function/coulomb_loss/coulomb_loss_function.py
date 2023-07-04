@@ -56,7 +56,7 @@ class CoulombLossFunction(AbstractLossFunction):
             for j in range(0, self.class_number):
                 for key in json.keys():
                     if str(i) in json[key] and str(j) in json[key]:
-                        matrix[i][j] = 1.5
+                        matrix[i][j] = 1
         return matrix.to(self.device)
 
     def update_centroids(self, predicted, target):
@@ -125,8 +125,8 @@ class CoulombLossFunction(AbstractLossFunction):
 
                 sum -= p.sum(1) / idx.shape[0]
                 sum -= p2.sum(1) / (100000 * idx.shape[0])
-        print(sum)
-        return torch.exp(sum)
+        #print(sum)
+        return sum +100
 
     def log_loss_details(self, predicted, target):
         centroids = self.centroids.detach().clone().to(self.device)

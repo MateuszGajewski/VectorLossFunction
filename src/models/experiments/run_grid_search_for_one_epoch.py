@@ -5,7 +5,7 @@ from src.models.run_experiment_from_config import Experiment
 
 
 def run_grid_search(file: Path):
-    batch_size = [128, 256, 1024, 2048]
+    batch_size = [32, 128, 512, 2048]
     batch_size.reverse()
     recalculate_period = [0, 5, 10, 20, 100, 200]
     recalculate_period.reverse()

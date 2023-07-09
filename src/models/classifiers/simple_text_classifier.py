@@ -27,6 +27,10 @@ class SimpleTextClassifier(nn.Module):
         #self.model.weight.data.uniform_(-initrange, initrange)
         #self.model.bias.data.zero_()
         # nn.init.xavier_uniform_(self.fc.weight)
+    def init_max_metrics(self, metrics):
+        self.max_metrics = {}
+        for i in metrics.keys():
+            self.max_metrics[i] = 0
 
     def forward(self, x):
         x = self.model(x)

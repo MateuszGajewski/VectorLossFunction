@@ -94,7 +94,7 @@ class SimpleVisualClassifier(nn.Module):
 
         if vector_to_label_transformer:
             vector_to_label_transformer.fit(criterion)
-            print(criterion.get_centroids())
+            #print(criterion.get_centroids())
         print("Finished Training")
         time_elapsed = time.time() - since
         mlflow.log_metric("Training time", time_elapsed)

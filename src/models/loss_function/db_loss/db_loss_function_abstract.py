@@ -53,7 +53,7 @@ class DBLossFunctionAbstract(AbstractLossFunction):
             for j in range(0, self.class_number):
                 for key in json.keys():
                     if str(i) in json[key] and str(j) in json[key]:
-                        matrix[i][j] = 1.5
+                        matrix[i][j] = 1
         return matrix.to(self.device)
 
     def update_centroids(self, predicted, target):

@@ -95,7 +95,7 @@ class SimpleTextClassifier(nn.Module):
             for i in metrics.keys():
                 mlflow.log_metric("max_value_" + i, self.max_metrics[i])
 
-    def validate(self, config, test_loader, metrics, vector_to_label_transformer=None):
+    def validate(self, config, test_loader, metrics, vector_to_label_transformer=None, step = None):
         total_loss = 0.0
         total_number = 0
         losses = {}
@@ -112,7 +112,7 @@ class SimpleTextClassifier(nn.Module):
                 outputs = outputs.to(config["training"]["device"])
                 if vector_to_label_transformer:
                     outputs = vector_to_label_transformer.predict(outputs)
-                elif outputs.shape[1] == 31:
+                elif outputs.shape[1] == 4:
                     _, outputs = torch.max(outputs.data, 1)
                 for j in metrics.keys():
                     losses[j] += metrics[j].calculate(outputs, labels)
@@ -121,4 +121,10 @@ class SimpleTextClassifier(nn.Module):
             for i in metrics.keys():
                 print(f"Finished validaion")
                 print(f"{i}: {losses[i] / total_number}")
-                mlflow.log_metric(i, losses[i] / total_number)
+                m = losses[i] / total_number
+                if m > self.max_metrics[i]:
+                    self.max_metrics[i] = m
+                if step is not None:
+                    mlflow.log_metric(i, m, step)
+                else:
+                    mlflow.log_metric(i, m)

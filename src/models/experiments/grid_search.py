@@ -7,9 +7,9 @@ from src.models.run_experiment_from_config import Experiment
 def run_grid_search(file: Path):
     batch_size = [32, 128, 512, 2048]
     batch_size.reverse()
-    recalculate_period = [0]
+    recalculate_period = [5, 20, 200, 500]
     recalculate_period.reverse()
-    out_dim = [10]
+    out_dim = [2, 3]
     out_dim.reverse()
     learning_rate = [0.001, 0.0001]
     for batch_size_ in batch_size:
@@ -43,5 +43,5 @@ def set_value_in_property_file(
 
 if __name__ == "__main__":
     run_grid_search(
-        Path("../configs/visual_config_cross_entropy_grid_search.ini")
+        Path("../configs/text_config_coulomb_grid_search.ini")
     )

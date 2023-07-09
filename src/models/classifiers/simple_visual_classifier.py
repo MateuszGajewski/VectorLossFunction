@@ -42,7 +42,7 @@ class SimpleVisualClassifier(nn.Module):
         if self.tanh_layer:
             x = F.tanh(x)
             #x = F.sigmoid(x)
-            #print(x)
+            #print('tanh')
         #print(x)
         if self.softmax_layer:
             x = F.log_softmax(x, dim=1)
@@ -76,7 +76,10 @@ class SimpleVisualClassifier(nn.Module):
                 # forward + backward + optimize
                 outputs = self.forward(inputs)
                 outputs = outputs.to(config["training"]["device"])
-                loss = criterion(outputs, labels, epoch)
+                if self.softmax_layer:
+                    loss = criterion(outputs, labels)
+                else:
+                    loss = criterion(outputs, labels, epoch)
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()

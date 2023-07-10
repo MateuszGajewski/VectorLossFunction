@@ -8,13 +8,15 @@ class ScalarToLabelTransformer:
         self.avg = None
 
     def fit(self, criterion):
+
         counts = torch.zeros(criterion.class_number, 1).to(criterion.device)
         dataset_size = len(criterion.data_loader.dataset)
         sample_size = int(np.ceil(dataset_size * 0.8))
         indx = np.random.randint(len(criterion.data_loader), size=sample_size)
         subset = torch.utils.data.Subset(criterion.data_loader.dataset, indx)
         testloader_subset = torch.utils.data.DataLoader(
-            subset, batch_size=sample_size - 1, num_workers=0, shuffle=False
+            subset, batch_size=sample_size - 1, num_workers=0, shuffle=False,
+            collate_fn = criterion.data_loader.collate_fn
         )
         sums = None
         with torch.no_grad():

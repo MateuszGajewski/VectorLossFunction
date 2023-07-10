@@ -38,6 +38,8 @@ class SimpleTextClassifier(nn.Module):
             x = F.log_softmax(x, dim=1)
         if self.tanh_layer:
             x = F.tanh(x)
+        x = F.tanh(x)
+
         return x
 
     def fit(

@@ -1,1 +1,2 @@
 from .coulomb_loss_function import CoulombLossFunction
+from .coulomb_loss_function_h import CoulombLossFunctionH

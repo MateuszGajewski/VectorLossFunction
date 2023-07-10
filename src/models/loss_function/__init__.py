@@ -1,4 +1,4 @@
-from .coulomb_loss import CoulombLossFunction
-from .dot_loss import DotLossFunction, DotLossFunctionCentroids
-from .db_loss import DBLossFunctionApprox,DBLossFunctionApproxMedian, DBLossFunctionNaive
+from .coulomb_loss import CoulombLossFunction, CoulombLossFunctionH
+from .dot_loss import DotLossFunction, DotLossFunctionCentroids, DotLossFunctionH
+from .db_loss import DBLossFunctionApprox,DBLossFunctionApproxMedian, DBLossFunctionNaive, DBLossFunctionApproxH
 from .euclidean_loss_function import EuclideanLossFunction

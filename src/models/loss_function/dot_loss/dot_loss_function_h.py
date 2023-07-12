@@ -115,8 +115,13 @@ class DotLossFunctionH(AbstractLossFunction):
                 a = a / (examples_normalized.shape[0] ** 2)
                 a = (idx.shape[0] / target.shape[0]) * a
                 alphas += a
-
-                b = 1 + torch.mm(examples_neg_normalized, examples_normalized.T)
+                tmp = 0
+                for i in idx_neg:
+                    exmpl = predicted[i]
+                    exmpl = torch.nn.functional.normalize(
+                    exmpl.squeeze(1)).squeeze(1)
+                    tmp += self.class_weights_matrix[c][target[i]] * torch.mm(exmpl, examples_normalized.T)
+                b = 1 + tmp
                 b = b / 2
                 b = b.sum()
                 b = b / (

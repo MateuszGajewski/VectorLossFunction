@@ -47,6 +47,7 @@ class AGNewsDataLoader:
         #train_dataset, test_dataset = to_map_style_dataset(train_dataset), to_map_style_dataset(test_dataset)
         train_dataset, test_dataset = to_map_style_dataset(train_dataset), to_map_style_dataset(test_dataset)
         train_dataset = train_dataset[0:1000]
+        print(train_dataset)
         train_loader = DataLoader(train_dataset, batch_size=int(config["training"]["batch_size"]), collate_fn=self.collate_batch, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=int(config["training"]["batch_size"]), collate_fn=self.collate_batch)
         #print(len(self.vectorizer.get_feature_names_out()))

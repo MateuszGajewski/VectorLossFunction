@@ -30,13 +30,14 @@ class TextDataLoader:
     def collate_batch(self, batch):
 
         Y, X = list(zip(*batch))
+        Y = [1 if y == 5 else 0 for y in Y]
         X = [self.tokenizer(x) for x in X]
         X = [tokens + [""] * (self.max_words - len(tokens)) if len(tokens) < self.max_words else tokens[:self.max_words] for tokens in
              X]
         X_tensor = torch.zeros(len(batch), self.max_words, self.embed_len)
         for i, tokens in enumerate(X):
             X_tensor[i] = self.global_vectors.get_vecs_by_tokens(tokens)
-        return X_tensor.reshape(len(batch), -1), torch.tensor(Y) - 1
+        return X_tensor.reshape(len(batch), -1), torch.tensor(Y)
 
     def get_data_loaders(self, config):
         self.device = config["training"]["device"]

@@ -148,7 +148,7 @@ class Experiment:
             )
 
     def validate(self):
-        if not self.validate_after_epoch:
+        #if not self.validate_after_epoch:
             self.cls.validate(
                 self.config,
                 self.test_loader,

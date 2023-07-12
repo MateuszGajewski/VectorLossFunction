@@ -21,7 +21,7 @@ class AGNewsDataLoader:
         self.vocab = None
         self.tokenizer = None
         self.device = None
-        self.global_vectors = GloVe(name='840B', dim=300)
+        self.global_vectors = GloVe(name='6B', dim=300)
         self.tokenizer = get_tokenizer("basic_english")
         self.max_words = 50
         self.embed_len = 300
@@ -46,7 +46,7 @@ class AGNewsDataLoader:
         train_dataset, test_dataset  = torchtext.datasets.AG_NEWS()
         #train_dataset, test_dataset = to_map_style_dataset(train_dataset), to_map_style_dataset(test_dataset)
         train_dataset, test_dataset = to_map_style_dataset(train_dataset), to_map_style_dataset(test_dataset)
-
+        train_dataset = train_dataset[0:1000]
         train_loader = DataLoader(train_dataset, batch_size=int(config["training"]["batch_size"]), collate_fn=self.collate_batch, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=int(config["training"]["batch_size"]), collate_fn=self.collate_batch)
         #print(len(self.vectorizer.get_feature_names_out()))

@@ -68,6 +68,6 @@ if __name__ == "__main__":
     run_stability_test(
         "http://127.0.0.1:9999",
         "visual_coulomb_grid_search",
-        Path("../configs/visual_config_coulomb_grid_search.ini"),
-        ['loss_function.CoulombLossFunction']
+        Path("../configs/text_config_scalar_grid_search.ini"),
+        ['loss_function.DotLossFunctionH']
     )
